@@ -176,32 +176,32 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div>
                         <x-logo variant="white" size="xl" class="mb-4" />
-                        <p class="text-eva-silver leading-relaxed">Eviniz için en kaliteli mobilyalar ve dekorasyon ürünleri.</p>
+                        <p class="text-white leading-relaxed opacity-90">Eviniz için en kaliteli mobilyalar ve dekorasyon ürünleri.</p>
                     </div>
                     
                     <div>
-                        <h4 class="font-semibold mb-4">Kategoriler</h4>
-                        <ul class="space-y-2 text-gray-400">
-                            <li><a href="#" class="hover:text-white transition-colors duration-300">Oturma Odası</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors duration-300">Yatak Odası</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors duration-300">Yemek Odası</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors duration-300">Dekorasyon</a></li>
+                        <h4 class="font-semibold mb-4 text-white">Kategoriler</h4>
+                        <ul class="space-y-2 text-white">
+                            <li><a href="#" class="hover:text-eva-gold transition-colors duration-300">Oturma Odası</a></li>
+                            <li><a href="#" class="hover:text-eva-gold transition-colors duration-300">Yatak Odası</a></li>
+                            <li><a href="#" class="hover:text-eva-gold transition-colors duration-300">Yemek Odası</a></li>
+                            <li><a href="#" class="hover:text-eva-gold transition-colors duration-300">Dekorasyon</a></li>
                         </ul>
                     </div>
                     
                     <div>
-                        <h4 class="font-semibold mb-4">Kurumsal</h4>
-                        <ul class="space-y-2 text-gray-400">
-                            <li><a href="#" class="hover:text-white transition-colors duration-300">Hakkımızda</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors duration-300">İletişim</a></li>
-                            <li><a href="{{ route('bulk.order') }}" class="hover:text-white transition-colors duration-300">Toplu Sipariş</a></li>
-                            <li><a href="{{ route('blog.index') }}" class="hover:text-white transition-colors duration-300">Blog</a></li>
+                        <h4 class="font-semibold mb-4 text-white">Kurumsal</h4>
+                        <ul class="space-y-2 text-white">
+                            <li><a href="#" class="hover:text-eva-gold transition-colors duration-300">Hakkımızda</a></li>
+                            <li><a href="#" class="hover:text-eva-gold transition-colors duration-300">İletişim</a></li>
+                            <li><a href="{{ route('bulk.order') }}" class="hover:text-eva-gold transition-colors duration-300">Toplu Sipariş</a></li>
+                            <li><a href="{{ route('blog.index') }}" class="hover:text-eva-gold transition-colors duration-300">Blog</a></li>
                         </ul>
                     </div>
                     
                     <div>
-                        <h4 class="font-semibold mb-4">İletişim</h4>
-                        <ul class="space-y-3 text-gray-400">
+                        <h4 class="font-semibold mb-4 text-white">İletişim</h4>
+                        <ul class="space-y-3 text-white">
                             <li class="flex items-center">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -218,7 +218,7 @@
                     </div>
                 </div>
                 
-                <div class="border-t border-eva-gold/30 mt-12 pt-8 text-center text-eva-silver">
+                <div class="border-t border-eva-gold/30 mt-12 pt-8 text-center text-white">
                     <p>&copy; {{ date('Y') }} EVA HOME. Tüm hakları saklıdır.</p>
                 </div>
             </div>
