@@ -73,11 +73,11 @@
                                class="text-eva-gold hover:text-eva-charcoal transition-colors">
                                 Düzenle
                             </a>
-                            <form action="{{ route('admin.categories.destroy', $category) }}" method="POST" class="inline">
+                            <form action="{{ route('admin.categories.destroy', $category) }}" method="POST" class="inline" id="delete-form-{{ $category->id }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-800 transition-colors"
-                                        onclick="return confirm('Silmek istediğinizden emin misiniz?')">
+                                <button type="button" class="text-red-600 hover:text-red-800 transition-colors"
+                                        onclick="confirmDelete({{ $category->id }}, '{{ $category->name }}')">
                                     Sil
                                 </button>
                             </form>
@@ -95,5 +95,13 @@
         </tbody>
     </table>
 </div>
+
+<script>
+function confirmDelete(categoryId, categoryName) {
+    if (confirm(`"${categoryName}" kategorisini silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!`)) {
+        document.getElementById(`delete-form-${categoryId}`).submit();
+    }
+}
+</script>
 @endsection
 

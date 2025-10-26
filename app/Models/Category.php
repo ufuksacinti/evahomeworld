@@ -52,6 +52,12 @@ class Category extends Model
         return $this->hasMany(Product::class);
     }
 
+    // Route model binding
+    public function getRouteKeyName()
+    {
+        return 'id';
+    }
+
     // Helper methods
     public function hasChildren()
     {
