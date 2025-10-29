@@ -47,10 +47,16 @@ class HomeController extends Controller
         if ($mostLikedProducts->count() < 8) {
             $featuredProducts = Product::where('is_active', true)
                 ->where('is_featured', true)
-                ->with(['energyCollection', 'category'])
-                ->orderBy('sort_order')
-                ->take(8)
-                ->get();
+                ->with(['energyCollection', 'category']);
+            
+            // sort_order kolonu varsa ona göre sırala
+            if (Schema::hasColumn('products', 'sort_order')) {
+                $featuredProducts = $featuredProducts->orderBy('sort_order');
+            } else {
+                $featuredProducts = $featuredProducts->orderBy('created_at', 'desc');
+            }
+            
+            $featuredProducts = $featuredProducts->take(8)->get();
         }
         
         // Eğer hala ürün yoksa, en son eklenenleri göster
@@ -64,10 +70,16 @@ class HomeController extends Controller
             $mostLikedProducts = $mostLikedProducts->merge($featuredProducts)->take(8);
         }
         
-        $energyCollections = EnergyCollection::where('is_active', true)
-            ->orderBy('sort_order')
-            ->take(4)
-            ->get();
+        $energyCollections = EnergyCollection::where('is_active', true);
+        
+        // sort_order kolonu varsa ona göre sırala
+        if (Schema::hasColumn('energy_collections', 'sort_order')) {
+            $energyCollections = $energyCollections->orderBy('sort_order');
+        } else {
+            $energyCollections = $energyCollections->orderBy('created_at', 'desc');
+        }
+        
+        $energyCollections = $energyCollections->take(4)->get();
         
         return view('home', compact('mostLikedProducts', 'energyCollections'));
     }
