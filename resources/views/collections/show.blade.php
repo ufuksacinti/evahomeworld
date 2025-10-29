@@ -1,328 +1,233 @@
-@extends('layouts.main')
+@extends('layouts.app')
 
-@section('title', $collection->name . ' - EVA HOME')
+@section('title', $collection->name . ' - Enerji Koleksiyonu')
 
 @section('content')
-<div class="min-h-screen" style="background-color: {{ $collection->color_hex }}08;">
+
+<!-- Hero Section with Collection Color -->
+<section class="relative h-96 flex items-center justify-center overflow-hidden" style="background: linear-gradient(135deg, {{ $collection->color_code }} 0%, {{ $collection->color_code }}DD 100%);">
+    <div class="absolute inset-0 bg-black/20"></div>
+    <div class="relative z-10 container text-center text-white">
+        <div class="inline-block w-24 h-24 rounded-full mb-6 shadow-2xl" style="background-color: {{ $collection->color_code }};"></div>
+        <h1 class="text-5xl md:text-7xl font-bold mb-6">{{ $collection->name }}</h1>
+        <p class="text-xl md:text-2xl max-w-3xl mx-auto">{{ $collection->description }}</p>
+    </div>
     
-    @if($collection->type === 'energy')
-        <!-- Energy Collection Header -->
-        <section class="relative overflow-hidden" 
-                 style="background: linear-gradient(135deg, {{ $collection->color_hex }}20 0%, {{ $collection->color_hex }}40 100%);">
-            <!-- Decorative Elements -->
-            <div class="absolute top-10 right-10 opacity-10">
-                <x-wax-seal type="gold" size="2xl" />
-            </div>
-            <div class="absolute bottom-10 left-10 opacity-5">
-                <x-wax-seal type="bronze" size="2xl" />
-            </div>
-            
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <!-- Left Side - Collection Info -->
-                    <div>
-                        <!-- Color Badge -->
-                        <div class="inline-flex items-center gap-3 px-6 py-3 rounded-full mb-6 border-2 border-white shadow-lg"
-                             style="background-color: {{ $collection->color_hex }};">
-                            <span class="w-4 h-4 rounded-full bg-white"></span>
-                            <span class="font-medium text-eva-charcoal">{{ $collection->color_description }}</span>
+    <!-- Decorative Elements -->
+    <div class="absolute top-10 left-10 w-32 h-32 rounded-full opacity-20 blur-3xl" style="background-color: {{ $collection->color_code }};"></div>
+    <div class="absolute bottom-10 right-10 w-40 h-40 rounded-full opacity-20 blur-3xl" style="background-color: {{ $collection->color_code }};"></div>
+</section>
+
+<!-- Products Section -->
+<section class="py-16 bg-gray-50">
+    <div class="container">
+        @if($products->count() > 0)
+        <div class="section-header mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">
+                {{ $collection->name }} Koleksiyonundan Ürünler
+            </h2>
+            <p class="text-gray-600">Toplam {{ $products->total() }} ürün bulundu</p>
+        </div>
+        
+        <!-- 4 Column Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
+            @foreach($products as $product)
+            <div class="product-card bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group flex flex-col">
+                <!-- Product Image -->
+                <div class="relative aspect-square bg-gray-100 overflow-hidden">
+                    @if($product->image)
+                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" 
+                             class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br" 
+                             style="background: linear-gradient(135deg, {{ $collection->color_code }}15, {{ $collection->color_code }}30);">
+                            <div class="text-center p-8">
+                                <div class="text-4xl mb-2">📦</div>
+                                <span class="text-gray-600 text-sm font-semibold">Görsel yüklenecek</span>
+                            </div>
                         </div>
-                        
-                        <!-- Collection Name -->
-                        <x-heading level="1" class="mb-6">
-                            {{ $collection->name }}
-                        </x-heading>
-                        
-                        <!-- Visual Feeling -->
-                        @if($collection->visual_feeling)
-                            <p class="text-2xl italic text-eva-charcoal/80 mb-8">
-                                {{ $collection->visual_feeling }}
-                            </p>
-                        @endif
-                        
-                        <!-- Collection Details -->
-                        <div class="space-y-4">
-                            @if($collection->feeling)
-                                <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                                         style="background-color: {{ $collection->color_hex }}40;">
-                                        <svg class="w-6 h-6 text-eva-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    @endif
+                    
+                    <!-- Discount Badge -->
+                    @if($product->hasDiscount())
+                        <div class="absolute top-4 right-4 bg-accent text-white px-4 py-2 rounded-full font-bold shadow-lg text-sm">
+                            -{{ $product->discountPercentage() }}%
+                        </div>
+                    @endif
+                    
+                    <!-- Quick Actions Overlay -->
+                    <div class="absolute inset-0 bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <a href="{{ route('products.show', $product->slug) }}" 
+                           class="bg-indigo-600 text-white px-6 py-3 rounded-full font-bold text-sm hover:scale-110 transition-transform shadow-lg">
+                            Detay
+                        </a>
+                    </div>
+                    
+                    <!-- Favorite Badge -->
+                    <div id="favorite-badge-{{ $product->id }}" class="absolute top-3 right-3 hidden">
+                        <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-heart text-white text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Product Info -->
+                <div class="p-4">
+                    <!-- Category Badge -->
+                    @if($product->category)
+                        <div class="inline-block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
+                            {{ $product->category->name }}
+                        </div>
+                    @endif
+                    
+                    <h3 class="text-lg font-bold mb-1.5 text-gray-800 line-clamp-2">
+                        {{ $product->name }}
+                    </h3>
+                    
+                    <p class="text-gray-600 text-sm mb-2 line-clamp-2">
+                        {{ $product->short_description }}
+                    </p>
+                    
+                    <!-- Rating -->
+                    @if($product->rating > 0)
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                @for($i = 1; $i <= 5; $i++)
+                                    @if($i <= floor($product->rating))
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-eva-muted uppercase tracking-wider">Verdiği His</p>
-                                        <p class="text-lg text-eva-charcoal font-medium">{{ $collection->feeling }}</p>
-                                    </div>
-                                </div>
-                            @endif
-                            
-                            @if($collection->scent)
-                                <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                                         style="background-color: {{ $collection->color_hex }}40;">
-                                        <svg class="w-6 h-6 text-eva-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    @else
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 20 20">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                         </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-eva-muted uppercase tracking-wider">Koku</p>
-                                        <p class="text-lg text-eva-charcoal font-medium">{{ $collection->scent }}</p>
-                                    </div>
-                                </div>
-                            @endif
-                            
-                            @if($collection->energy)
-                                <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                                         style="background-color: {{ $collection->color_hex }}40;">
-                                        <svg class="w-6 h-6 text-eva-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-eva-muted uppercase tracking-wider">Enerji</p>
-                                        <p class="text-lg text-eva-charcoal font-medium">{{ $collection->energy }}</p>
-                                    </div>
-                                </div>
-                            @endif
-                            
-                            @if($collection->emotion)
-                                <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                                         style="background-color: {{ $collection->color_hex }}40;">
-                                        <svg class="w-6 h-6 text-eva-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-eva-muted uppercase tracking-wider">Ana Duygu</p>
-                                        <p class="text-lg text-eva-charcoal font-medium">{{ $collection->emotion }}</p>
-                                    </div>
-                                </div>
+                                    @endif
+                                @endfor
+                            </div>
+                            <span class="text-sm text-gray-600 ml-2">({{ $product->rating_count }})</span>
+                        </div>
+                    @endif
+                    
+                    <!-- Price -->
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            @if($product->hasDiscount())
+                                <span class="text-xl font-bold text-primary">{{ number_format($product->finalPrice(), 2) }} ₺</span>
+                                <span class="text-sm text-gray-400 line-through ml-2">{{ number_format($product->price, 2) }} ₺</span>
+                            @else
+                                <span class="text-xl font-bold text-primary">{{ number_format($product->price, 2) }} ₺</span>
                             @endif
                         </div>
                     </div>
                     
-                    <!-- Right Side - Story with Wax Seal -->
-                    @if($collection->story)
-                        <div class="relative bg-white rounded-2xl p-8 shadow-xl border-2"
-                             style="border-color: {{ $collection->color_hex }}40;">
-                            <!-- Wax Seal -->
-                            <div class="absolute -top-8 -right-8">
-                                <x-wax-seal type="gold" size="xl" />
-                            </div>
-                            
-                            <x-heading level="3" class="mb-4 text-eva-gold">
-                                Hikayesi
-                            </x-heading>
-                            <p class="text-lg text-eva-charcoal leading-relaxed">
-                                {{ $collection->story }}
-                            </p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </section>
-    @else
-        <!-- Shop Collection Header -->
-        <section class="relative py-16 bg-white border-b border-eva-silver/30">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                @if($collection->color_hex)
-                    <div class="flex items-center justify-center gap-3 mb-6">
-                        <span class="w-12 h-12 rounded-full border-2 border-eva-gold shadow-lg" 
-                              style="background-color: {{ $collection->color_hex }};"></span>
-                    </div>
-                @endif
-                
-                <x-heading level="1" class="mb-6">
-                    {{ $collection->name }}
-                </x-heading>
-                
-                @if($collection->description)
-                    <p class="text-xl text-eva-text max-w-3xl mx-auto">
-                        {{ $collection->description }}
-                    </p>
-                @endif
-            </div>
-        </section>
-    @endif
-
-    <!-- Products Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Sidebar - Other Collections -->
-            @if($otherCollections->count() > 0)
-            <aside class="lg:w-72 flex-shrink-0">
-                <div class="bg-white border border-eva-silver/30 rounded-lg p-6 sticky top-24 shadow-sm">
-                    <h3 class="font-heading font-semibold text-lg text-eva-heading mb-6">
-                        @if($collection->type === 'energy')
-                            Diğer Enerji Koleksiyonları
-                        @else
-                            Diğer Koleksiyonlar
-                        @endif
-                    </h3>
-                    <nav class="space-y-2">
-                        @foreach($otherCollections as $otherCollection)
-                            <a href="{{ route('collections.show', $otherCollection->slug) }}" 
-                               class="block px-4 py-3 rounded-lg transition-all duration-300 group hover:shadow-md"
-                               style="background-color: {{ $otherCollection->color_hex }}15;">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-4 h-4 rounded-full border border-white shadow-sm flex-shrink-0" 
-                                          style="background-color: {{ $otherCollection->color_hex }};"></span>
-                                    <span class="nav-text group-hover:text-eva-gold transition-colors">
-                                        {{ $otherCollection->name }}
-                                    </span>
-                                </div>
-                                @if($otherCollection->visual_feeling)
-                                    <p class="text-xs text-eva-muted mt-1 ml-7 italic">
-                                        {{ $otherCollection->visual_feeling }}
-                                    </p>
-                                @endif
-                            </a>
-                        @endforeach
-                    </nav>
-                </div>
-            </aside>
-            @endif
-
-            <!-- Products -->
-            <div class="flex-1">
-                @if($products->count() > 0)
-                    <!-- Product Count & Sort -->
-                    <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <p class="text-eva-charcoal">
-                                <span class="font-bold text-2xl tabular-nums">{{ $products->total() }}</span>
-                                <span class="text-eva-muted ml-2">ürün bulundu</span>
-                            </p>
-                        </div>
-                        
-                        <select class="nav-text border-2 border-eva-silver/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-eva-gold focus:border-eva-gold">
-                            <option>Önerilen</option>
-                            <option>Fiyat: Düşükten Yükseğe</option>
-                            <option>Fiyat: Yüksekten Düşüğe</option>
-                            <option>En Yeni</option>
-                        </select>
-                    </div>
-
-                    <!-- Products Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                        @foreach($products as $product)
-                            <div class="group bg-white rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-eva-silver/30">
-                                <a href="{{ route('products.show', $product->slug) }}" class="block">
-                                    <!-- Product Image -->
-                                    <div class="relative aspect-square bg-gray-100">
-                                        @if($product->images->count() > 0)
-                                            <img src="{{ asset('storage/' . $product->images->first()->image_path) }}" 
-                                                 alt="{{ $product->name }}"
-                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                        @else
-                                            <div class="w-full h-full flex items-center justify-center"
-                                                 style="background: linear-gradient(135deg, {{ $collection->color_hex }}20 0%, {{ $collection->color_hex }}40 100%);">
-                                                <x-wax-seal type="gold" size="xl" class="opacity-20" />
-                                            </div>
-                                        @endif
-
-                                        <!-- Collection Badge - Top Left -->
-                                        <div class="absolute top-3 left-3">
-                                            <x-collection-badge :collection="$collection" size="sm" />
-                                        </div>
-
-                                        <!-- Discount Badge -->
-                                        @if($product->hasDiscount())
-                                            <div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                                                -%{{ $product->getDiscountPercentage() }}
-                                            </div>
-                                        @endif
-                                        
-                                        <!-- Premium Badge (if featured) -->
-                                        @if($product->is_featured)
-                                            <div class="absolute bottom-3 right-3">
-                                                <x-wax-seal type="gold" size="sm" class="drop-shadow-lg" />
-                                            </div>
-                                        @endif
-
-                                        <!-- Favorite Button -->
-                                        <button class="absolute bottom-3 left-3 bg-white p-2 rounded-full shadow-md hover:bg-eva-gold hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-
-                                    <!-- Product Info -->
-                                    <div class="p-5">
-                                        <x-heading level="5" class="mb-2 line-clamp-2 group-hover:text-eva-gold transition-colors">
-                                            {{ $product->name }}
-                                        </x-heading>
-                                        
-                                        @if($product->category)
-                                            <p class="text-sm text-eva-muted mb-4">{{ $product->category->name }}</p>
-                                        @endif
-
-                                        <!-- Price -->
-                                        <div class="flex items-center justify-between">
-                                            <div>
-                                                @if($product->hasDiscount())
-                                                    <div class="flex items-baseline gap-2">
-                                                        <x-price :amount="$product->discount_price" size="lg" class="text-eva-price font-bold" />
-                                                        <x-price :amount="$product->price" size="sm" class="text-eva-muted line-through" />
-                                                    </div>
-                                                @else
-                                                    <x-price :amount="$product->price" size="lg" class="text-eva-price font-bold" />
-                                                @endif
-                                            </div>
-
-                                            <!-- Add to Cart Button -->
-                                            <button onclick="event.preventDefault(); /* Add to cart logic */" 
-                                                    class="bg-eva-charcoal text-white p-2.5 rounded-lg hover:bg-eva-gold transition-colors duration-300">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <!-- Pagination -->
-                    <div class="mt-8">
-                        {{ $products->links() }}
-                    </div>
-                @else
-                    <!-- Empty State -->
-                    <div class="text-center py-16">
-                        <div class="w-32 h-32 mx-auto mb-6 rounded-full flex items-center justify-center relative"
-                             style="background-color: {{ $collection->color_hex }}20;">
-                            <x-wax-seal type="gold" size="xl" class="opacity-30" />
-                        </div>
-                        
-                        <x-heading level="3" class="mb-4">
-                            Yakında Burada!
-                        </x-heading>
-                        
-                        <p class="text-lg text-eva-text mb-8 max-w-md mx-auto">
-                            @if($collection->type === 'energy')
-                                <span class="font-medium">{{ $collection->name }}</span> koleksiyonunun büyüleyici ürünleri çok yakında sizlerle buluşacak.
-                            @else
-                                Bu koleksiyona yakında ürünler eklenecektir.
-                            @endif
-                        </p>
-                        
-                        <a href="{{ route('home') }}" 
-                           class="inline-flex items-center gap-2 btn-text bg-eva-charcoal text-white px-8 py-4 rounded-lg hover:bg-eva-gold transition-colors duration-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    <!-- Action Buttons -->
+                    <div class="flex gap-2">
+                        <button onclick="addToCart({{ $product->id }})" 
+                                class="flex-1 py-2 px-3 bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-full font-semibold text-xs text-white transition-all duration-300 hover:scale-105 shadow-md">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
-                            Ana Sayfaya Dön
-                        </a>
+                            Sepete Ekle
+                        </button>
+                        <button onclick="toggleFavorite({{ $product->id }})" 
+                                id="favorite-btn-{{ $product->id }}"
+                                class="flex-1 py-2 px-3 bg-white border-2 border-indigo-600 rounded-full font-semibold text-xs text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-md">
+                            <i id="favorite-icon-{{ $product->id }}" class="far fa-heart mr-1"></i>
+                            Favorilere
+                        </button>
                     </div>
-                @endif
+                </div>
             </div>
+            @endforeach
         </div>
+        
+        <!-- Pagination -->
+        <div class="mt-12">
+            {{ $products->links() }}
+        </div>
+        
+        @else
+        <div class="text-center py-16">
+            <div class="inline-block w-24 h-24 rounded-full mb-6" style="background-color: {{ $collection->color_code }};"></div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">{{ $collection->name }} Koleksiyonunda Henüz Ürün Yok</h3>
+            <p class="text-gray-600 mb-8">Yakında bu koleksiyondan harika ürünler eklenecek!</p>
+            <a href="{{ route('collections.index') }}" class="btn btn-primary">
+                Tüm Koleksiyonları Gör
+            </a>
+        </div>
+        @endif
     </div>
-</div>
+</section>
+
+@push('scripts')
+<script>
+    function addToCart(productId) {
+        fetch('/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                alert('Ürün sepete eklendi!');
+                updateCartCount();
+            } else {
+                alert(data.message || 'Bir hata oluştu');
+            }
+        });
+    }
+    
+    function toggleFavorite(productId) {
+        fetch(`/favorites/toggle/${productId}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => {
+            if(response.status === 401) {
+                alert('Favorilere eklemek için lütfen giriş yapın.');
+                window.location.href = '/login';
+                return;
+            }
+            return response.json();
+        })
+        .then(data => {
+            if(data && data.success) {
+                const icon = document.getElementById(`favorite-icon-${productId}`);
+                const badge = document.getElementById(`favorite-badge-${productId}`);
+                
+                if(data.is_favorite) {
+                    icon.className = 'fas fa-heart mr-1';
+                    if(badge) badge.classList.remove('hidden');
+                } else {
+                    icon.className = 'far fa-heart mr-1';
+                    if(badge) badge.classList.add('hidden');
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    
+    function updateCartCount() {
+        fetch('/cart/count')
+            .then(response => response.json())
+            .then(data => {
+                const cartCount = document.getElementById('cartCount');
+                if(cartCount) {
+                    cartCount.textContent = data.count || 0;
+                }
+            });
+    }
+</script>
+@endpush
+
 @endsection
+

@@ -7,68 +7,77 @@ use App\Models\Category;
 
 class CategorySeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         $categories = [
             [
-                'name' => 'Oturma Odası',
-                'description' => 'Oturma odası mobilyaları ve aksesuarları',
-                'order' => 1,
-                'children' => ['Koltuk Takımları', 'TV Üniteleri', 'Sehpalar', 'Kitaplıklar']
+                'name' => 'Enerji Mumları',
+                'slug' => 'enerji-mumlari',
+                'description' => 'Özel enerjilerle dolu, pozitif enerji yayan mum koleksiyonumuz. Her mum, yaşamınıza özel değer katacak güçlerle bezenmiştir.',
+                'image' => null,
+                'sort_order' => 1,
+                'is_active' => true,
             ],
             [
-                'name' => 'Yatak Odası',
-                'description' => 'Yatak odası mobilyaları',
-                'order' => 2,
-                'children' => ['Yataklar', 'Gardroplar', 'Şifoniyerler', 'Başucu Lambaları']
+                'name' => 'Oda Kokuları',
+                'slug' => 'oda-kokulari',
+                'description' => 'Ev ve ofislerinize huzur getiren, rahatlatıcı aromalar. Her koku ile yaşam alanlarınızı özel hissettirin.',
+                'image' => null,
+                'sort_order' => 2,
+                'is_active' => true,
             ],
             [
-                'name' => 'Yemek Odası',
-                'description' => 'Yemek odası mobilyaları',
-                'order' => 3,
-                'children' => ['Yemek Masaları', 'Sandalyeler', 'Büfeler']
+                'name' => 'Enerji Wax Tablet',
+                'slug' => 'enerji-wax-tablet',
+                'description' => 'Pratik ve etkili enerji yayıcı wax tablet koleksiyonumuz. Her tablet özenle seçilmiş enerjilerle hazırlanmıştır.',
+                'image' => null,
+                'sort_order' => 3,
+                'is_active' => true,
             ],
             [
-                'name' => 'Mutfak',
-                'description' => 'Mutfak mobilyaları ve aksesuarları',
-                'order' => 4,
-                'children' => ['Mutfak Masaları', 'Bar Tabureleri', 'Mutfak Dolapları']
+                'name' => 'Vazolar',
+                'slug' => 'vazolar',
+                'description' => 'Şık ve dekoratif vazo koleksiyonumuz. Her vazo, bulunduğu alana değer katacak özel tasarımlara sahiptir.',
+                'image' => null,
+                'sort_order' => 4,
+                'is_active' => true,
             ],
             [
-                'name' => 'Aydınlatma',
-                'description' => 'Ev aydınlatma ürünleri',
-                'order' => 5,
-                'children' => ['Avizeler', 'Lambaderler', 'Masa Lambaları', 'Duvar Aplikleri']
+                'name' => 'Hediye Setleri',
+                'slug' => 'hediye-setleri',
+                'description' => 'Sevdikleriniz için özel hazırlanmış hediye setlerimiz. Her set, sizin için anlamlı bir paket içerir.',
+                'image' => null,
+                'sort_order' => 5,
+                'is_active' => true,
             ],
             [
-                'name' => 'Dekorasyon',
-                'description' => 'Ev dekorasyon ürünleri',
-                'order' => 6,
-                'children' => ['Tablolar', 'Vazolar', 'Mumlar', 'Duvar Süsleri']
+                'name' => 'Gelin Çiçekleri',
+                'slug' => 'gelin-cicekleri',
+                'description' => 'Özel günleriniz için tasarlanmış, zarif ve romantik gelin çiçekleri koleksiyonumuz.',
+                'image' => null,
+                'sort_order' => 6,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Dekoratif Kutu',
+                'slug' => 'dekoratif-kutu',
+                'description' => 'Şık ve modern dekoratif kutu koleksiyonumuz. Her kutu, saklama ve sergileme için ideal tasarımlara sahiptir.',
+                'image' => null,
+                'sort_order' => 7,
+                'is_active' => true,
             ],
         ];
 
-        foreach ($categories as $categoryData) {
-            $children = $categoryData['children'] ?? [];
-            unset($categoryData['children']);
-
-            $category = Category::create([
-                'name' => $categoryData['name'],
-                'slug' => \Illuminate\Support\Str::slug($categoryData['name']),
-                'description' => $categoryData['description'] ?? null,
-                'order' => $categoryData['order'],
-                'is_active' => true,
-            ]);
-
-            foreach ($children as $index => $childName) {
-                Category::create([
-                    'name' => $childName,
-                    'slug' => \Illuminate\Support\Str::slug($childName),
-                    'parent_id' => $category->id,
-                    'order' => $index + 1,
-                    'is_active' => true,
-                ]);
-            }
+        foreach ($categories as $category) {
+            Category::updateOrCreate(
+                ['slug' => $category['slug']],
+                $category
+            );
         }
+
+        $this->command->info('Categories seeded successfully!');
     }
 }

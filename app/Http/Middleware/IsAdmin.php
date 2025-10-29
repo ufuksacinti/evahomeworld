@@ -16,11 +16,11 @@ class IsAdmin
     public function handle(Request $request, Closure $next): Response
     {
         if (!auth()->check()) {
-            return redirect()->route('login');
+            return redirect()->route('login')->with('error', 'Bu sayfaya erişim için giriş yapmalısınız.');
         }
 
         if (auth()->user()->role !== 'admin') {
-            abort(403, 'Bu alana erişim yetkiniz yok.');
+            return redirect()->route('home')->with('error', 'Bu sayfaya erişim yetkiniz yok.');
         }
 
         return $next($request);

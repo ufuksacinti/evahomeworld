@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -21,8 +23,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'phone',
-        'role',
     ];
 
     /**
@@ -47,46 +47,36 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
-    // Relationships
-    public function addresses()
-    {
-        return $this->hasMany(Address::class);
-    }
-
-    public function orders()
-    {
-        return $this->hasMany(Order::class);
-    }
-
-    public function favorites()
+    
+    /**
+     * Get the favorites for the user.
+     */
+    public function favorites(): HasMany
     {
         return $this->hasMany(Favorite::class);
     }
-
-    public function cart()
+    
+    /**
+     * Get the favorite products for the user.
+     */
+    public function favoriteProducts(): BelongsToMany
     {
-        return $this->hasOne(Cart::class);
+        return $this->belongsToMany(Product::class, 'favorites')->withTimestamps();
     }
-
-    public function blogPosts()
+    
+    /**
+     * Get the carts for the user.
+     */
+    public function carts(): HasMany
     {
-        return $this->hasMany(BlogPost::class);
+        return $this->hasMany(Cart::class);
     }
-
-    public function bulkOrders()
+    
+    /**
+     * Get the orders for the user.
+     */
+    public function orders(): HasMany
     {
-        return $this->hasMany(BulkOrder::class);
-    }
-
-    // Helper methods
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isCustomer()
-    {
-        return $this->role === 'customer';
+        return $this->hasMany(Order::class);
     }
 }
