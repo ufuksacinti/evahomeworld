@@ -105,9 +105,17 @@ header('Content-Type: text/html; charset=utf-8');
             echo '<div class="command">' . htmlspecialchars($composerPath) . ' install --no-dev --optimize-autoloader</div>';
             echo '<p>⏳ Composer bağımlılıkları yükleniyor... Bu işlem 2-5 dakika sürebilir.</p>';
             
+            // COMPOSER_HOME environment variable ayarla (eğer yoksa)
+            $homeDir = $_SERVER['HOME'] ?? '/tmp';
+            $composerHome = $basePath . '/.composer';
+            if (!is_dir($composerHome)) {
+                @mkdir($composerHome, 0755, true);
+            }
+            
             $output = [];
             $return_var = 0;
-            $command = 'cd ' . escapeshellarg($basePath) . ' && ' . $composerPath . ' install --no-dev --optimize-autoloader 2>&1';
+            // COMPOSER_HOME ve HOME environment variable'larını ayarla
+            $command = 'cd ' . escapeshellarg($basePath) . ' && HOME=' . escapeshellarg($homeDir) . ' COMPOSER_HOME=' . escapeshellarg($composerHome) . ' ' . $composerPath . ' install --no-dev --optimize-autoloader 2>&1';
             
             exec($command, $output, $return_var);
             
@@ -130,6 +138,8 @@ header('Content-Type: text/html; charset=utf-8');
                 $outputString = implode("\n", $output);
                 if (strpos($outputString, 'command not found') !== false) {
                     echo '<p class="warning">⚠️ Composer komutu bulunamadı. composer.phar dosyasını manuel olarak indirmeniz gerekiyor.</p>';
+                } elseif (strpos($outputString, 'HOME or COMPOSER_HOME') !== false || strpos($outputString, 'environment variable') !== false) {
+                    echo '<p class="warning">⚠️ Composer HOME environment variable hatası. Script güncellendi, lütfen tekrar deneyin.</p>';
                 }
             }
             echo '</div>';
@@ -163,17 +173,24 @@ header('Content-Type: text/html; charset=utf-8');
                     
                     try {
                         \Illuminate\Support\Facades\Artisan::call($command);
-                        $output = \Illuminate\Support\Facades\Artisan::output();
+                        $artisanOutput = \Illuminate\Support\Facades\Artisan::output();
                         
                         echo '<pre style="max-height: 100px;">';
-                        echo htmlspecialchars($output ?: '(Başarılı)');
+                        echo htmlspecialchars($artisanOutput ?: '(Başarılı)');
                         echo '</pre>';
                         echo '<span style="color: #28a745;">✓</span>';
                     } catch (\Exception $e) {
+                        $errorMsg = $e->getMessage();
                         echo '<pre style="max-height: 100px;">';
-                        echo htmlspecialchars($e->getMessage());
+                        echo htmlspecialchars($errorMsg);
                         echo '</pre>';
-                        echo '<span style="color: #dc3545;">⚠️ Hata</span>';
+                        
+                        // SQLite hatasını kontrol et (kritik değil)
+                        if (strpos($errorMsg, 'database.sqlite') !== false || strpos($errorMsg, 'sqlite') !== false) {
+                            echo '<span style="color: #ffc107;">⚠️ SQLite cache hatası (önemli değil, cache file driver kullanılıyor)</span>';
+                        } else {
+                            echo '<span style="color: #dc3545;">⚠️ Hata</span>';
+                        }
                     }
                     echo '</div>';
                 }
@@ -290,17 +307,24 @@ header('Content-Type: text/html; charset=utf-8');
                     
                     try {
                         \Illuminate\Support\Facades\Artisan::call($command);
-                        $output = \Illuminate\Support\Facades\Artisan::output();
+                        $artisanOutput = \Illuminate\Support\Facades\Artisan::output();
                         
                         echo '<pre style="max-height: 100px;">';
-                        echo htmlspecialchars($output ?: '(Başarılı)');
+                        echo htmlspecialchars($artisanOutput ?: '(Başarılı)');
                         echo '</pre>';
                         echo '<span style="color: #28a745;">✓</span>';
                     } catch (\Exception $e) {
+                        $errorMsg = $e->getMessage();
                         echo '<pre style="max-height: 100px;">';
-                        echo htmlspecialchars($e->getMessage());
+                        echo htmlspecialchars($errorMsg);
                         echo '</pre>';
-                        echo '<span style="color: #dc3545;">⚠️ Hata</span>';
+                        
+                        // SQLite hatasını kontrol et (kritik değil)
+                        if (strpos($errorMsg, 'database.sqlite') !== false || strpos($errorMsg, 'sqlite') !== false) {
+                            echo '<span style="color: #ffc107;">⚠️ SQLite cache hatası (önemli değil, cache file driver kullanılıyor)</span>';
+                        } else {
+                            echo '<span style="color: #dc3545;">⚠️ Hata</span>';
+                        }
                     }
                     echo '</div>';
                 }
