@@ -1,17 +1,21 @@
 <?php
 /**
- * Laravel Application
- * This file redirects all requests to the public directory
+ * Laravel Application Bootstrap
+ * 
+ * Bu dosya public_html klasörüne kopyalanmalıdır.
+ * Document Root public klasörüne ayarlanamıyorsa bu çözüm kullanılır.
  */
 
 $uri = urldecode(
     parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)
 );
 
-// If the file exists in public_html/public, serve it directly
-if ($uri !== '/' && file_exists(__DIR__.'/public'.$uri)) {
-    return false;
+// Public klasöründeki dosyaları doğrudan servis et
+$publicPath = __DIR__ . '/public' . $uri;
+
+if ($uri !== '/' && file_exists($publicPath) && !is_dir($publicPath)) {
+    return false; // Apache/Nginx dosyayı doğrudan servis eder
 }
 
-// Otherwise forward to index.php in public folder
-require_once __DIR__.'/public/index.php';
+// Laravel bootstrap
+require_once __DIR__ . '/public/index.php';

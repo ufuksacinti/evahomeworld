@@ -112,10 +112,36 @@ header('Content-Type: text/html; charset=utf-8');
                 @mkdir($composerHome, 0755, true);
             }
             
+            // PHP extension'larını kontrol et
+            echo '<p class="info">📋 PHP Extension Kontrolü:</p>';
+            $requiredExtensions = ['fileinfo', 'iconv', 'mbstring', 'pdo', 'pdo_mysql'];
+            $missingExtensions = [];
+            foreach ($requiredExtensions as $ext) {
+                if (!extension_loaded($ext)) {
+                    $missingExtensions[] = $ext;
+                    echo '<p class="warning">⚠️ <code>' . htmlspecialchars($ext) . '</code> extension yüklü değil.</p>';
+                } else {
+                    echo '<p class="success">✓ <code>' . htmlspecialchars($ext) . '</code> extension yüklü.</p>';
+                }
+            }
+            
             $output = [];
             $return_var = 0;
             // COMPOSER_HOME ve HOME environment variable'larını ayarla
-            $command = 'cd ' . escapeshellarg($basePath) . ' && HOME=' . escapeshellarg($homeDir) . ' COMPOSER_HOME=' . escapeshellarg($composerHome) . ' ' . $composerPath . ' install --no-dev --optimize-autoloader 2>&1';
+            putenv('HOME=' . $homeDir);
+            putenv('COMPOSER_HOME=' . $composerHome);
+            
+            // Eksik extension'lar varsa --ignore-platform-req ekle
+            $ignoreFlag = '';
+            if (!empty($missingExtensions)) {
+                foreach ($missingExtensions as $ext) {
+                    $ignoreFlag .= ' --ignore-platform-req=ext-' . $ext;
+                }
+                echo '<p class="warning">⚠️ Eksik extension\'lar nedeniyle <code>--ignore-platform-req</code> flag\'i kullanılacak.</p>';
+                echo '<p class="info">ℹ️ Extension\'ları etkinleştirmek için hosting sağlayıcınızla iletişime geçin veya cPanel PHP Selector\'dan aktif edin.</p>';
+            }
+            
+            $command = 'cd ' . escapeshellarg($basePath) . ' && HOME=' . escapeshellarg($homeDir) . ' COMPOSER_HOME=' . escapeshellarg($composerHome) . ' ' . $composerPath . ' install --no-dev --optimize-autoloader' . $ignoreFlag . ' 2>&1';
             
             exec($command, $output, $return_var);
             
