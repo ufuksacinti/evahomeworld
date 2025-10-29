@@ -70,12 +70,22 @@ if (!function_exists('t')) {
      */
     function t($key, $locale = null)
     {
-        $locale = $locale ?: app()->getLocale();
+        // Eğer translations tablosu yoksa, key'i direkt döndür
+        if (!\Illuminate\Support\Facades\Schema::hasTable('translations')) {
+            return $key;
+        }
         
-        $translation = \App\Models\Translation::where('key', $key)->first();
-        
-        if ($translation) {
-            return $translation->{$locale} ?: $translation->tr ?: $key;
+        try {
+            $locale = $locale ?: app()->getLocale();
+            
+            $translation = \App\Models\Translation::where('key', $key)->first();
+            
+            if ($translation) {
+                return $translation->{$locale} ?: $translation->tr ?: $key;
+            }
+        } catch (\Exception $e) {
+            // Hata durumunda key'i döndür
+            return $key;
         }
         
         return $key;
