@@ -70,4 +70,3 @@ DESCRIBE `energy_collections`;
 -- ============================================
 -- Artık site hatasız çalışmalı. Test edin:
 -- https://evahomeworld.com
-
