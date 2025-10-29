@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\EnergyCollection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class HomeController extends Controller
 {
@@ -13,13 +14,31 @@ class HomeController extends Controller
      */
     public function index()
     {
+        // Rating kolonu var mı kontrol et
+        $hasRatingColumn = Schema::hasColumn('products', 'rating');
+        
         // En çok beğenilenler (rating ve view_count'a göre)
         $mostLikedProducts = Product::where('is_active', true)
-            ->with(['energyCollection', 'category'])
-            ->where('rating', '>', 4) // Yüksek puanlılar
-            ->orderBy('rating', 'desc')
-            ->orderBy('view_count', 'desc')
-            ->orderBy('rating_count', 'desc')
+            ->with(['energyCollection', 'category']);
+        
+        // Rating kolonu varsa rating'e göre filtrele ve sırala
+        if ($hasRatingColumn) {
+            $mostLikedProducts = $mostLikedProducts
+                ->where('rating', '>', 4) // Yüksek puanlılar
+                ->orderBy('rating', 'desc');
+        }
+        
+        // View count kolonu varsa ona göre sırala
+        if (Schema::hasColumn('products', 'view_count')) {
+            $mostLikedProducts = $mostLikedProducts->orderBy('view_count', 'desc');
+        }
+        
+        if ($hasRatingColumn && Schema::hasColumn('products', 'rating_count')) {
+            $mostLikedProducts = $mostLikedProducts->orderBy('rating_count', 'desc');
+        }
+        
+        $mostLikedProducts = $mostLikedProducts
+            ->orderBy('created_at', 'desc') // Son eklenenler
             ->take(8)
             ->get();
         
