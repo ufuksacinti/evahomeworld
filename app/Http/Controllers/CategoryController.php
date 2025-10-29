@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class CategoryController extends Controller
 {
@@ -12,9 +13,15 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+        $categories = Category::where('is_active', true);
+        
+        if (Schema::hasColumn('categories', 'sort_order')) {
+            $categories = $categories->orderBy('sort_order');
+        } else {
+            $categories = $categories->orderBy('created_at', 'desc');
+        }
+        
+        $categories = $categories->get();
         
         return view('categories.index', compact('categories'));
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class ProductController extends Controller
 {
@@ -29,7 +30,13 @@ class ProductController extends Controller
             });
         }
         
-        $products = $query->orderBy('sort_order')->paginate(12);
+        if (Schema::hasColumn('products', 'sort_order')) {
+            $query = $query->orderBy('sort_order');
+        } else {
+            $query = $query->orderBy('created_at', 'desc');
+        }
+        
+        $products = $query->paginate(12);
         
         return view('products.index', compact('products'));
     }

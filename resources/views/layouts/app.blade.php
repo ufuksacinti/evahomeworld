@@ -141,7 +141,13 @@
                         </button>
                         <div id="submenu-collections" class="hidden pl-4 space-y-1 mt-1">
                             @php
-                                $collections = \App\Models\EnergyCollection::where('is_active', true)->orderBy('sort_order')->get();
+                                $collections = \App\Models\EnergyCollection::where('is_active', true);
+                                if (\Illuminate\Support\Facades\Schema::hasTable('energy_collections') && \Illuminate\Support\Facades\Schema::hasColumn('energy_collections', 'sort_order')) {
+                                    $collections = $collections->orderBy('sort_order');
+                                } else {
+                                    $collections = $collections->orderBy('created_at', 'desc');
+                                }
+                                $collections = $collections->get();
                             @endphp
                             @foreach($collections as $collection)
                                 <a href="{{ route('collections.show', $collection->slug) }}" class="block py-2 px-4 pl-8 hover:bg-gray-100 rounded text-gray-700 flex items-center">
@@ -162,7 +168,13 @@
                         </button>
                         <div id="submenu-categories" class="hidden pl-4 space-y-1 mt-1">
                             @php
-                                $categories = \App\Models\Category::where('is_active', true)->orderBy('sort_order')->get();
+                                $categories = \App\Models\Category::where('is_active', true);
+                                if (\Illuminate\Support\Facades\Schema::hasColumn('categories', 'sort_order')) {
+                                    $categories = $categories->orderBy('sort_order');
+                                } else {
+                                    $categories = $categories->orderBy('created_at', 'desc');
+                                }
+                                $categories = $categories->get();
                             @endphp
                             @foreach($categories as $cat)
                                 <a href="{{ route('categories.show', $cat->slug) }}" class="block py-2 px-4 pl-8 hover:bg-gray-100 rounded text-gray-700">

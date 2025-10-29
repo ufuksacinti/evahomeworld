@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EnergyCollection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class EnergyCollectionController extends Controller
 {
@@ -12,9 +13,15 @@ class EnergyCollectionController extends Controller
      */
     public function index()
     {
-        $collections = EnergyCollection::where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+        $collections = EnergyCollection::where('is_active', true);
+        
+        if (Schema::hasTable('energy_collections') && Schema::hasColumn('energy_collections', 'sort_order')) {
+            $collections = $collections->orderBy('sort_order');
+        } else {
+            $collections = $collections->orderBy('created_at', 'desc');
+        }
+        
+        $collections = $collections->get();
         
         return view('collections.index', compact('collections'));
     }
