@@ -2,127 +2,180 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Product extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'category_id',
-        'collection_id',
         'name',
-        'slug',
         'sku',
+        'slug',
         'description',
         'short_description',
+        'energy_collection_id',
+        'category_id',
         'price',
         'discount_price',
-        'stock',
+        'currency',
+        'stock_quantity',
+        'reserved_stock',
+        'low_stock_threshold',
+        'in_stock',
+        'manage_stock',
+        'allow_backorder',
+        'image',
+        'gallery',
+        'sort_order',
         'is_featured',
         'is_active',
         'view_count',
-        'sale_count',
+        'rating',
+        'rating_count',
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
     ];
 
     protected $casts = [
+        'gallery' => 'array',
         'price' => 'decimal:2',
         'discount_price' => 'decimal:2',
+        'in_stock' => 'boolean',
+        'manage_stock' => 'boolean',
         'is_featured' => 'boolean',
         'is_active' => 'boolean',
+        'rating' => 'decimal:2',
     ];
 
-    // Auto generate slug
-    protected static function boot()
+    /**
+     * Get the energy collection that owns the product.
+     */
+    public function energyCollection(): BelongsTo
     {
-        parent::boot();
-        
-        static::creating(function ($product) {
-            if (empty($product->slug)) {
-                $product->slug = Str::slug($product->name);
-            }
-        });
+        return $this->belongsTo(EnergyCollection::class);
     }
 
-    // Relationships
-    public function category()
+    /**
+     * Get the category that owns the product.
+     */
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function collection()
+    /**
+     * Get the images for the product.
+     */
+    public function images(): HasMany
     {
-        return $this->belongsTo(Collection::class);
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
-    public function images()
+    /**
+     * Get the primary image for the product.
+     */
+    public function primaryImage(): HasMany
     {
-        return $this->hasMany(ProductImage::class)->orderBy('order');
+        return $this->hasMany(ProductImage::class)->where('is_primary', true);
     }
 
-    public function attributes()
-    {
-        return $this->hasMany(ProductAttribute::class);
-    }
-
-    public function cartItems()
-    {
-        return $this->hasMany(CartItem::class);
-    }
-
-    public function orderItems()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
-
-    public function favorites()
-    {
-        return $this->hasMany(Favorite::class);
-    }
-
-    public function campaigns()
-    {
-        return $this->belongsToMany(Campaign::class, 'campaign_products');
-    }
-
-    // Helper methods
-    public function getPrimaryImage()
-    {
-        return $this->images()->where('is_primary', true)->first() ?? $this->images()->first();
-    }
-
-    public function getFinalPrice()
+    /**
+     * Get the final price of the product.
+     */
+    public function finalPrice(): float
     {
         return $this->discount_price ?? $this->price;
     }
 
-    public function hasDiscount()
+    /**
+     * Check if product has discount.
+     */
+    public function hasDiscount(): bool
     {
-        return !is_null($this->discount_price) && $this->discount_price < $this->price;
+        return $this->discount_price !== null && $this->discount_price < $this->price;
     }
 
-    public function getDiscountPercentage()
+    /**
+     * Get discount percentage.
+     */
+    public function discountPercentage(): int
     {
         if (!$this->hasDiscount()) {
             return 0;
         }
-        return round((($this->price - $this->discount_price) / $this->price) * 100);
+        
+        return (int) (($this->price - $this->discount_price) / $this->price * 100);
     }
-
-    public function isInStock()
+    
+    /**
+     * Get users who favorited this product.
+     */
+    public function favoritedBy(): BelongsToMany
     {
-        return $this->stock > 0;
+        return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
     }
-
-    public function incrementViewCount()
+    
+    /**
+     * Check if available stock is sufficient
+     */
+    public function hasStock(int $quantity = 1): bool
     {
-        $this->increment('view_count');
+        if (!$this->manage_stock) {
+            return true;
+        }
+        
+        $availableStock = $this->stock_quantity - $this->reserved_stock;
+        return $availableStock >= $quantity;
     }
-
-    public function incrementSaleCount($quantity = 1)
+    
+    /**
+     * Get available stock (total - reserved)
+     */
+    public function getAvailableStockAttribute(): int
     {
-        $this->increment('sale_count', $quantity);
+        if (!$this->manage_stock) {
+            return 999999; // Unlimited
+        }
+        
+        return $this->stock_quantity - $this->reserved_stock;
+    }
+    
+    /**
+     * Check if stock is low
+     */
+    public function isLowStock(): bool
+    {
+        if (!$this->manage_stock) {
+            return false;
+        }
+        
+        return $this->stock_quantity <= $this->low_stock_threshold;
+    }
+    
+    /**
+     * Reserve stock
+     */
+    public function reserveStock(int $quantity): bool
+    {
+        if (!$this->hasStock($quantity)) {
+            return false;
+        }
+        
+        $this->increment('reserved_stock', $quantity);
+        return true;
+    }
+    
+    /**
+     * Release reserved stock
+     */
+    public function releaseStock(int $quantity): void
+    {
+        $this->decrement('reserved_stock', $quantity);
+        $this->reserved_stock = max(0, $this->reserved_stock);
+        $this->save();
     }
 }

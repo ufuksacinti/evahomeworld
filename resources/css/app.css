@@ -1,263 +1,98 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* ========================================
-   EVA HOME - Premium Typography System
-   Playfair Display + Inter Combination
-   Inspired by: Jo Malone, Dior Home, Aesop
-   ======================================== */
-
-:root {
-    /* Font Families */
-    --font-heading: "Playfair Display", Georgia, serif;
-    --font-body: "Inter", system-ui, -apple-system, sans-serif;
-    
-    /* Typography Colors */
-    --color-heading: #1B1B1B;
-    --color-body: #222222;
-    --color-text: #333333;
-    --color-price: #000000;
-    --color-muted: #666666;
-    --color-light: #999999;
-    
-    /* Brand Colors - EVA HOME Premium */
-    --color-soft-white: #FAF8F6;   /* Arka plan (web beyazı) */
-    --color-charcoal: #2B2B2B;     /* Metin (ana gövde) */
-    --color-gold: #D8B36F;         /* Altın detay (mühür, ip, vurgular) */
-    --color-silver: #C7C2BA;       /* Gümüş detay */
-    
-    /* Collection Colors */
-    --color-jasmine: #F6EBD9;      /* Golden Jasmine - Işıltılı, sıcak */
-    --color-rose: #D9A7A0;         /* Velvet Rose - Romantik, zarif */
-    --color-citrus: #F9CBA3;       /* Citrus Harmony - Neşeli, canlı */
-    --color-bloom: #F5CEDB;        /* Luminous Bloom - Arınmış, taze */
-    --color-oud: #C9D8C5;          /* Sacred Oud - Dingin, mistik */
-    --color-earth: #D7C8B6;        /* Earth Harmony - Topraklanmış, güvenli */
-    --color-spice: #C4BDB5;        /* Royal Spice - Sofistike, güçlü */
-    --color-lavender: #D4C3E1;     /* Lavender Peace - Sakin, huzurlu */
-    
-    /* Typography Scale */
-    --letter-spacing-tight: -0.01em;
-    --letter-spacing-normal: 0;
-    --letter-spacing-wide: 0.1px;
-    --letter-spacing-wider: 0.2px;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@400;700&display=swap');
 
 @layer base {
-    /* Body Text - Inter */
-    body {
-        font-family: var(--font-body);
-        color: var(--color-charcoal);
-        background-color: var(--color-soft-white);
-        line-height: 1.6;
-        font-weight: 400;
-        letter-spacing: var(--letter-spacing-normal);
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        font-variant-numeric: tabular-nums;
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
     }
-    
-    /* Headings - Playfair Display */
-    h1, h2, h3, h4, h5, h6 {
-        font-family: var(--font-heading);
-        color: var(--color-heading);
-        font-weight: 600;
-        line-height: 1.2;
-        letter-spacing: var(--letter-spacing-wider);
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
-    
-    h1 {
-        font-size: 3rem; /* 48px */
-        line-height: 1.1;
-    }
-    
-    h2 {
-        font-size: 2.25rem; /* 36px */
-    }
-    
-    h3 {
-        font-size: 1.875rem; /* 30px */
-    }
-    
-    h4 {
-        font-size: 1.5rem; /* 24px */
-    }
-    
-    /* Paragraph Text */
-    p {
-        color: var(--color-text);
-        font-weight: 400;
-        line-height: 1.6;
-    }
-    
-    /* Links */
-    a {
-        color: var(--color-body);
-        transition: color 0.2s ease;
-    }
-    
-    a:hover {
-        color: var(--color-heading);
-    }
-}
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.8s ease-out;
+  }
+  
+  .animate-fade-in-delay {
+    animation: fade-in 1s ease-out;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Content Wrapper - Başlık ve açıklamalar için max-width */
+  .content-wrapper {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Section Header - Başlık ve açıklama için dar max-width */
+  .section-header {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    text-align: center;
+  }
+  
+      /* Product Card - Daha kompakt tasarım */
+      .product-card {
+        padding: 1rem !important;
+      }
 
-@layer components {
-    /* Navigation & Menu */
-    .nav,
-    .menu,
-    nav a {
-        font-family: var(--font-body);
-        font-weight: 500;
-        letter-spacing: var(--letter-spacing-wider);
-        color: var(--color-body);
-    }
-    
-    /* Buttons */
-    .btn,
-    button[type="submit"],
-    button[type="button"] {
-        font-family: var(--font-body);
-        font-weight: 500;
-        letter-spacing: var(--letter-spacing-wider);
-    }
-    
-    /* Price Elements */
-    .price {
-        font-family: var(--font-body);
-        font-weight: 500;
-        color: var(--color-price);
-        letter-spacing: var(--letter-spacing-wide);
-        font-variant-numeric: tabular-nums;
-        font-feature-settings: "tnum" 1;
-    }
-    
-    /* Premium Card */
-    .premium-card {
-        @apply bg-white rounded-lg shadow-sm border border-gray-100;
-    }
-    
-    /* Premium Heading */
-    .premium-heading {
-        @apply font-heading font-semibold text-eva-heading;
-        letter-spacing: 0.2px;
-    }
-}
+      .product-card .product-info {
+        padding: 1rem !important;
+      }
 
-@layer utilities {
-    /* Typography Utilities */
-    .font-heading {
-        font-family: var(--font-heading);
+      .product-card h3 {
+        line-height: 1.3 !important;
+        margin-bottom: 0.5rem !important;
+      }
+
+      .product-card p {
+        line-height: 1.4 !important;
+        margin-bottom: 0.75rem !important;
+      }
+
+      /* Scale 102 utility for subtle hover */
+      .scale-102 {
+        transform: scale(1.02);
+      }
     }
-    
-    .font-body {
-        font-family: var(--font-body);
-    }
-    
-    /* Tabular nums for prices and numbers */
-    .tabular-nums {
-        font-variant-numeric: tabular-nums;
-        font-feature-settings: "tnum" 1;
-    }
-    
-    .proportional-nums {
-        font-variant-numeric: proportional-nums;
-    }
-    
-    /* Text Colors */
-    .text-heading {
-        color: var(--color-heading);
-    }
-    
-    .text-body {
-        color: var(--color-body);
-    }
-    
-    .text-price {
-        color: var(--color-price);
-    }
-    
-    /* Letter Spacing */
-    .tracking-tight {
-        letter-spacing: var(--letter-spacing-tight);
-    }
-    
-    .tracking-wide {
-        letter-spacing: var(--letter-spacing-wide);
-    }
-    
-    .tracking-wider {
-        letter-spacing: var(--letter-spacing-wider);
-    }
-    
-    /* Dropdown Sub-menu Fix */
-    .dropdown-parent:hover .dropdown-submenu {
-        opacity: 1;
-        visibility: visible;
-    }
-    
-    /* Interactive Hero Styles */
-    .energy-icon {
-        position: relative;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .energy-icon:hover {
-        transform: translateY(-2px);
-    }
-    
-    .energy-icon::before {
-        content: '';
-        position: absolute;
-        inset: -2px;
-        border-radius: 50%;
-        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-    
-    .energy-icon:hover::before {
-        opacity: 1;
-    }
-    
-    /* Collection Story Animation */
-    #collection-story {
-        backdrop-filter: blur(10px);
-        background: rgba(250, 248, 246, 0.95);
-    }
-    
-    #collection-story.show {
-        opacity: 1 !important;
-        transform: translateY(0) !important;
-    }
-    
-    /* Collection Visual Transitions */
-    #collection-visual {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    #collection-visual::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
-        transform: translateX(-100%);
-        transition: transform 0.6s ease;
-    }
-    
-    #collection-visual:hover::before {
-        transform: translateX(100%);
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .energy-icon {
-            transform: none !important;
-        }
-        
-        .energy-icon:hover {
-            transform: none;
-        }
-    }
-}

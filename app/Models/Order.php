@@ -2,92 +2,70 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
-    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
-        'user_id',
         'order_number',
-        'total_amount',
-        'discount_amount',
-        'shipping_amount',
+        'user_id',
+        'customer_name',
+        'customer_email',
+        'customer_phone',
+        'shipping_address',
+        'shipping_city',
+        'shipping_zip',
+        'shipping_country',
+        'billing_address',
+        'billing_city',
+        'billing_zip',
+        'subtotal',
+        'tax',
+        'shipping_cost',
+        'discount',
+        'total',
+        'currency',
         'status',
         'payment_status',
         'payment_method',
-        'payment_transaction_id',
-        'shipping_address',
-        'billing_address',
-        'notes',
+        'order_notes',
+        'admin_notes',
     ];
 
     protected $casts = [
-        'total_amount' => 'decimal:2',
-        'discount_amount' => 'decimal:2',
-        'shipping_amount' => 'decimal:2',
-        'shipping_address' => 'array',
-        'billing_address' => 'array',
+        'subtotal' => 'decimal:2',
+        'tax' => 'decimal:2',
+        'shipping_cost' => 'decimal:2',
+        'discount' => 'decimal:2',
+        'total' => 'decimal:2',
     ];
 
-    // Auto generate order number
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($order) {
-            if (empty($order->order_number)) {
-                $order->order_number = 'ORD-' . strtoupper(uniqid());
-            }
-        });
-    }
-
-    // Relationships
-    public function user()
+    /**
+     * Get the user that owns the order.
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function items()
+    /**
+     * Get the order items for the order.
+     */
+    public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    // Helper methods
-    public function getGrandTotal()
+    /**
+     * Generate unique order number
+     */
+    public static function generateOrderNumber(): string
     {
-        return $this->total_amount - $this->discount_amount + $this->shipping_amount;
-    }
-
-    public function isPending()
-    {
-        return $this->status === 'pending';
-    }
-
-    public function isProcessing()
-    {
-        return $this->status === 'processing';
-    }
-
-    public function isShipped()
-    {
-        return $this->status === 'shipped';
-    }
-
-    public function isDelivered()
-    {
-        return $this->status === 'delivered';
-    }
-
-    public function isCancelled()
-    {
-        return $this->status === 'cancelled';
-    }
-
-    public function isPaid()
-    {
-        return $this->payment_status === 'paid';
+        return 'ORD' . date('Ymd') . rand(1000, 9999);
     }
 }

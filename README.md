@@ -1,230 +1,212 @@
-# EvaHome - Laravel E-Ticaret Projesi
+# EvaHome - E-Ticaret Projesi
 
-Modern ve full-featured Laravel e-ticaret projesi. Ev mobilyaları ve dekorasyon ürünleri satışı için geliştirilmiştir.
+Laravel tabanlı, Enerji Koleksiyonları ve Ürün Kategorileri ile ürün satışı yapılan modern bir e-ticaret sitesi.
 
-## 🚀 Özellikler
+## 📋 Özellikler
 
-### Kullanıcı Tarafı
-- ✅ Modern ve responsive anasayfa
-- ✅ Ürün listeleme ve filtreleme
-- ✅ Ürün detay sayfası (5-6 görsel, özellikler)
-- ✅ Kategori bazlı ürün görüntüleme
-- ✅ Sepet sistemi (misafir ve üye)
-- ✅ Favori ürünler
-- ✅ Sipariş oluşturma
-- ✅ Sipariş takibi
-- ✅ Blog sistemi
-- ✅ Toplu sipariş talebi formu
-- ✅ Kullanıcı profili ve adres yönetimi
+### Veritabanı Yapısı
 
-### Admin Paneli
-- ✅ Dashboard (istatistikler, grafikler)
-- ✅ Ürün yönetimi (CRUD)
-- ✅ Çoklu görsel yükleme
-- ✅ Ürün özellikleri yönetimi
-- ✅ Kategori yönetimi (hiyerarşik)
-- ✅ Sipariş yönetimi ve durum güncelleme
-- ✅ Blog yazısı yönetimi
-- ✅ En çok görüntülenen ürünler
-- ✅ En çok satılan ürünler
-- ✅ Stok uyarıları
+Proje, ürün satışları için optimize edilmiş şu ana tablolara sahiptir:
 
-## 📦 Kurulum
+1. **energy_collections** (Enerji Koleksiyonları)
+   - Renk kodları (`color_code`) ile özel koleksiyonlar
+   - Açıklama, görsel ve sıralama desteği
+   - Aktif/pasif durum yönetimi
+
+2. **categories** (Ürün Kategorileri)
+   - Ürün kategorileri
+   - Açıklama, görsel ve sıralama desteği
+   - Aktif/pasif durum yönetimi
+
+3. **products** (Ürünler)
+   - Enerji koleksiyonlarına bağlı
+   - Kategorilere bağlı
+   - Fiyat, indirim fiyatı, stok yönetimi
+   - SEO meta bilgileri
+   - Galeri desteği (JSON)
+   - Ürün SKU ve slug ile benzersiz tanımlama
+
+4. **product_images** (Ürün Görselleri)
+   - Her ürün için çoklu görsel desteği
+   - Ana görsel işaretleme
+   - Sıralama desteği
+
+### Modeller ve İlişkiler
+
+Tüm modeller arası ilişkiler tanımlanmıştır:
+
+- **EnergyCollection**
+  - `products()` - Koleksiyona ait tüm ürünler
+  - `activeProducts()` - Aktif ürünler
+
+- **Category**
+  - `products()` - Kategoriye ait tüm ürünler
+  - `activeProducts()` - Aktif ürünler
+
+- **Product**
+  - `energyCollection()` - Ürünün bağlı olduğu koleksiyon
+  - `category()` - Ürünün bağlı olduğu kategori
+  - `images()` - Ürün görselleri
+  - `primaryImage()` - Ana görsel
+  - `finalPrice()` - Nihai fiyat (indirim varsa indirimli fiyat)
+  - `hasDiscount()` - İndirim kontrolü
+  - `discountPercentage()` - İndirim yüzdesi
+
+- **ProductImage**
+  - `product()` - Görselin ait olduğu ürün
+
+### Merkezi CSS Yönetim Sistemi
+
+Tüm CSS yapılandırması `resources/css/app.css` dosyasında merkezi olarak yönetilir:
+
+#### Yönetilen Değerler
+- **Font Ailesi**: Primary, Secondary, Display fontları
+- **Font Boyutları**: xs'den 5xl'e kadar ölçeklenebilir boyutlar
+- **Font Ağırlıkları**: Light'dan Extrabold'a kadar
+- **Renk Sistemi**: Primary, Secondary, Accent renkler
+- **Gri Tonları**: 50'den 900'e kadar nötr renkler
+- **Durum Renkleri**: Success, Warning, Error, Info
+- **Arka Plan Renkleri**: Primary, Secondary, Tertiary
+- **Metin Renkleri**: Primary, Secondary, Tertiary, Light, White
+- **Gölgeler**: sm'den 2xl'e kadar shadow değerleri
+- **Boşluklar**: 0'dan 32'ye kadar spacing değerleri
+- **Border Radius**: none'dan full'e kadar yuvarlatma değerleri
+- **Geçişler**: Hızlı, orta, yavaş transition değerleri
+- **Z-Index Katmanları**: Modal, Dropdown, Tooltip için katmanlar
+
+#### Kullanım Örneği
+CSS dosyasında değişiklik yaparak tüm sitenin stilini tek yerden kontrol edebilirsiniz:
+
+```css
+:root {
+  --color-primary: #6366f1;  /* Ana rengi değiştirin */
+  --font-primary: 'Inter', sans-serif;  /* Font ailesini değiştirin */
+  --spacing-4: 1rem;  /* Boşluk değerlerini değiştirin */
+}
+```
+
+## 🚀 Kurulum
 
 ### Gereksinimler
-- PHP 8.2+
+- PHP >= 8.2
 - Composer
-- Node.js & NPM
-- MySQL/SQLite
-- XAMPP veya başka bir local server
+- MySQL veya SQLite
+- Node.js ve NPM (Frontend için)
 
-### Adım 1: Bağımlılıkları Yükleyin
+### Adımlar
 
+1. **Composer bağımlılıklarını yükleyin**:
 ```bash
 composer install
+```
+
+2. **Ortam değişkenlerini ayarlayın**:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+3. **Veritabanını yapılandırın**:
+`.env` dosyasında veritabanı ayarlarınızı yapın.
+
+4. **Veritabanını oluşturun**:
+```bash
+php artisan migrate
+```
+
+5. **Frontend bağımlılıklarını yükleyin**:
+```bash
 npm install
 ```
 
-### Adım 2: Environment Ayarları
-
-.env.example dosyasını .env olarak kopyalayın (zaten oluşturuldu):
-
+6. **Assets'leri derleyin**:
 ```bash
-# Veritabanı ayarlarını yapılandırın
-DB_CONNECTION=sqlite
-# SQLite kullanıyoruz (database/database.sqlite)
-```
-
-### Adım 3: Veritabanını Hazırlayın
-
-```bash
-# Migration'ları çalıştırın
-php artisan migrate:fresh
-
-# Demo verileri yükleyin
-php artisan db:seed
-```
-
-### Adım 4: Storage Link Oluşturun
-
-```bash
-php artisan storage:link
-```
-
-### Adım 5: Frontend Asset'leri Derleyin
-
-```bash
+npm run dev
+# veya production için:
 npm run build
 ```
 
-### Adım 6: Projeyi Çalıştırın
-
+7. **Sunucuyu başlatın**:
 ```bash
 php artisan serve
 ```
 
-Tarayıcınızda `http://localhost:8000` adresini açın.
+## 📁 Proje Yapısı
 
-## 🔐 Giriş Bilgileri
-
-### Admin Kullanıcı
-- **Email:** admin@evahome.com
-- **Şifre:** password
-- **Panel:** http://localhost:8000/admin
-
-### Test Müşteri
-- **Email:** musteri@test.com
-- **Şifre:** password
-
-## 📊 Veritabanı Yapısı
-
-### Ana Tablolar
-- **users** - Kullanıcılar (admin ve müşteriler)
-- **categories** - Ürün kategorileri (hiyerarşik)
-- **products** - Ürünler
-- **product_images** - Ürün görselleri (çoklu)
-- **product_attributes** - Ürün özellikleri
-- **orders** - Siparişler
-- **order_items** - Sipariş detayları
-- **carts** - Sepetler
-- **cart_items** - Sepet ürünleri
-- **favorites** - Favori ürünler
-- **campaigns** - Kampanyalar
-- **blog_posts** - Blog yazıları
-- **blog_categories** - Blog kategorileri
-- **bulk_orders** - Toplu sipariş talepleri
-- **addresses** - Kullanıcı adresleri
-- **settings** - Site ayarları
-
-## 🛣️ Önemli Rotalar
-
-### Frontend
-- `/` - Anasayfa
-- `/urunler` - Ürün listesi
-- `/urunler/{slug}` - Ürün detay
-- `/kategori/{slug}` - Kategori sayfası
-- `/sepet` - Sepet
-- `/favoriler` - Favoriler
-- `/blog` - Blog listesi
-- `/blog/{slug}` - Blog yazısı
-- `/toplu-siparis` - Toplu sipariş formu
-
-### Admin Panel
-- `/admin` - Dashboard
-- `/admin/products` - Ürün yönetimi
-- `/admin/categories` - Kategori yönetimi
-- `/admin/orders` - Sipariş yönetimi
-- `/admin/blog-posts` - Blog yönetimi
-
-## 💳 Ödeme Entegrasyonu
-
-Proje, Iyzico ve Shopier ödeme sistemleri için hazır altyapıya sahiptir.
-
-### Iyzico Entegrasyonu İçin:
-```bash
-composer require iyzico/iyzipay-php
+```
+evahome/
+├── app/
+│   ├── Http/
+│   │   └── Controllers/
+│   │       ├── HomeController.php
+│   │       ├── ProductController.php
+│   │       ├── EnergyCollectionController.php
+│   │       └── CategoryController.php
+│   └── Models/
+│       ├── EnergyCollection.php
+│       ├── Category.php
+│       ├── Product.php
+│       └── ProductImage.php
+├── database/
+│   └── migrations/
+│       ├── *_create_energy_collections_table.php
+│       ├── *_create_categories_table.php
+│       ├── *_create_products_table.php
+│       └── *_create_product_images_table.php
+├── resources/
+│   ├── css/
+│   │   └── app.css          # Merkezi CSS yönetim sistemi
+│   ├── views/
+│   │   ├── layouts/
+│   │   │   └── app.blade.php # Ana layout
+│   │   └── home.blade.php
+└── routes/
+    └── web.php
 ```
 
-### Shopier Entegrasyonu İçin:
-API anahtarlarınızı `.env` dosyasına ekleyin ve `CartController::processOrder` metodunu güncelleyin.
+## 🎨 CSS Yönetimi
 
-## 🎨 Frontend Geliştirme
+Tüm stil ayarlarınızı değiştirmek için `resources/css/app.css` dosyasını düzenleyin:
 
-Frontend için Tailwind CSS kullanılmaktadır.
+- **Font Ayarları**: `--font-primary`, `--font-secondary` değişkenlerini değiştirin
+- **Renkler**: `--color-primary`, `--color-secondary` gibi değişkenleri düzenleyin
+- **Arka Plan**: `--bg-primary`, `--bg-secondary` değerlerini ayarlayın
+- **Spacing**: `--spacing-*` değerlerini ihtiyacınıza göre ayarlayın
 
-```bash
-# Development mode
-npm run dev
+## 🔗 Route'lar
 
-# Production build
-npm run build
-```
+- `/` - Ana sayfa
+- `/products` - Ürünler listesi
+- `/products/{slug}` - Ürün detayı
+- `/collections` - Enerji koleksiyonları listesi
+- `/collections/{slug}` - Koleksiyon detayı
+- `/categories` - Kategoriler listesi
+- `/categories/{slug}` - Kategori detayı
 
-## 📝 Demo Veriler
+## 📝 Sonraki Adımlar
 
-Seeder ile oluşturulan demo veriler:
-- 2 kullanıcı (1 admin, 1 müşteri)
-- 6 ana kategori + 22 alt kategori
-- 10 ürün (farklı kategorilerde)
-- 4 blog kategorisi
-- 5 blog yazısı
+1. Admin paneli eklenmesi (Laravel Breeze veya Filament kullanılabilir)
+2. Sepet ve ödeme sistemi entegrasyonu
+3. Kullanıcı kayıt/giriş sistemi
+4. Ürün ve kategori yönetimi için admin paneli
+5. Görsel yükleme ve yönetim sistemi
 
-## 🔧 Özelleştirme
+## 👥 Katkıda Bulunma
 
-### Logo ve Site Bilgileri
-`resources/views/layouts/main.blade.php` dosyasından logo ve site adını değiştirebilirsiniz.
-
-### Renkler
-Tailwind CSS kullanıldığı için `tailwind.config.js` dosyasından renkleri özelleştirebilirsiniz.
-
-## 📱 View Dosyaları (Oluşturulacak)
-
-Aşağıdaki view dosyaları yapılandırma ile oluşturulabilir:
-
-### Frontend Views
-- `resources/views/products/index.blade.php` - Ürün listesi
-- `resources/views/products/show.blade.php` - Ürün detay
-- `resources/views/products/category.blade.php` - Kategori sayfası
-- `resources/views/products/favorites.blade.php` - Favoriler
-- `resources/views/cart/index.blade.php` - Sepet
-- `resources/views/cart/checkout.blade.php` - Ödeme sayfası
-- `resources/views/orders/index.blade.php` - Siparişlerim
-- `resources/views/orders/show.blade.php` - Sipariş detay
-- `resources/views/blog/index.blade.php` - Blog listesi
-- `resources/views/blog/show.blade.php` - Blog yazısı
-- `resources/views/bulk-order.blade.php` - Toplu sipariş formu
-
-### Admin Views
-- `resources/views/admin/dashboard.blade.php` - Dashboard
-- `resources/views/admin/products/` - Ürün yönetimi sayfaları
-- `resources/views/admin/categories/` - Kategori yönetimi
-- `resources/views/admin/orders/` - Sipariş yönetimi
-- `resources/views/admin/blog-posts/` - Blog yönetimi
-
-## 🐛 Troubleshooting
-
-### Storage klasörü izinleri
-```bash
-chmod -R 755 storage
-chmod -R 755 bootstrap/cache
-```
-
-### Cache temizleme
-```bash
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
-php artisan route:clear
-```
+Projeye katkıda bulunmak için:
+1. Fork edin
+2. Yeni bir branch oluşturun
+3. Değişikliklerinizi yapın
+4. Pull request gönderin
 
 ## 📄 Lisans
 
-Bu proje açık kaynak kodludur.
+Bu proje MIT lisansı altında lisanslanmıştır.
 
-## 👨‍💻 Geliştirici
+## 📞 İletişim
 
-EvaHome E-Ticaret Projesi - Laravel 12
+Sorularınız için: info@evahome.com
 
-## 🤝 Katkıda Bulunma
+---
 
-Pull request'ler kabul edilir. Büyük değişiklikler için önce bir issue açın.
+**EvaHome** - Enerji koleksiyonları ile özel tasarım ürünler

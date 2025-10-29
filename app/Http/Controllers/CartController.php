@@ -2,191 +2,183 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cart;
 use App\Models\Product;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Notifications\OrderPlacedNotification;
+use App\Models\Cart;
+use App\Models\CartItem;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    private function getOrCreateCart()
-    {
-        if (auth()->check()) {
-            $cart = Cart::firstOrCreate(
-                ['user_id' => auth()->id()],
-                ['session_id' => null]
-            );
-        } else {
-            $sessionId = session()->getId();
-            $cart = Cart::firstOrCreate(
-                ['session_id' => $sessionId],
-                ['user_id' => null]
-            );
-        }
-
-        return $cart;
-    }
-
+    /**
+     * Display cart
+     */
     public function index()
     {
-        $cart = $this->getOrCreateCart();
-        $cart->load('items.product.images');
-
-        return view('cart.index', compact('cart'));
+        $cart = currentCart();
+        $items = $cart->items()->with('product')->get();
+        
+        return view('cart.index', compact('cart', 'items'));
     }
-
-    public function add(Product $product, Request $request)
+    
+    /**
+     * Add item to cart
+     */
+    public function add(Request $request)
     {
         $request->validate([
-            'quantity' => 'required|integer|min:1'
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
         ]);
-
-        if ($product->stock < $request->quantity) {
-            return redirect()->back()->with('error', 'Yetersiz stok.');
+        
+        $product = Product::findOrFail($request->product_id);
+        
+        // Stock kontrolü
+        if (!$product->hasStock($request->quantity)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient stock',
+            ], 400);
         }
-
-        $cart = $this->getOrCreateCart();
-        $cart->addItem($product, $request->quantity);
-
-        return redirect()->back()->with('success', 'Ürün sepete eklendi.');
+        
+        $cart = currentCart();
+        
+        // Ürün sepette var mı kontrol et
+        $cartItem = $cart->items()->where('product_id', $request->product_id)->first();
+        
+        if ($cartItem) {
+            // Miktarı güncelle
+            $newQuantity = $cartItem->quantity + $request->quantity;
+            
+            if (!$product->hasStock($newQuantity - $cartItem->quantity)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Insufficient stock',
+                ], 400);
+            }
+            
+            $cartItem->quantity = $newQuantity;
+            $cartItem->price = $product->finalPrice();
+            $cartItem->subtotal = $cartItem->price * $cartItem->quantity;
+            $cartItem->save();
+        } else {
+            // Yeni ürün ekle
+            CartItem::create([
+                'cart_id' => $cart->id,
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'price' => $product->finalPrice(),
+                'subtotal' => $product->finalPrice() * $request->quantity,
+            ]);
+        }
+        
+        // Stok rezerve et
+        $product->reserveStock($request->quantity);
+        
+        // Sepeti güncelle
+        $cart->calculateTotal();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Product added to cart',
+            'cart_count' => $cart->item_count,
+        ]);
     }
-
-    public function update(Product $product, Request $request)
+    
+    /**
+     * Update cart item
+     */
+    public function update(Request $request, $itemId)
     {
         $request->validate([
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
         ]);
-
-        $cart = $this->getOrCreateCart();
-        $cart->updateQuantity($product->id, $request->quantity);
-
-        return redirect()->back()->with('success', 'Sepet güncellendi.');
+        
+        $cart = currentCart();
+        $cartItem = $cart->items()->findOrFail($itemId);
+        $product = $cartItem->product;
+        
+        $quantityDifference = $request->quantity - $cartItem->quantity;
+        
+        if ($quantityDifference > 0 && !$product->hasStock($quantityDifference)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient stock',
+            ], 400);
+        }
+        
+        // Stok rezervasyonunu güncelle
+        if ($quantityDifference > 0) {
+            $product->reserveStock($quantityDifference);
+        } else {
+            $product->releaseStock(abs($quantityDifference));
+        }
+        
+        $cartItem->quantity = $request->quantity;
+        $cartItem->subtotal = $cartItem->price * $request->quantity;
+        $cartItem->save();
+        
+        $cart->calculateTotal();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Cart updated',
+            'item_subtotal' => $cartItem->subtotal,
+            'cart_total' => $cart->total,
+        ]);
     }
-
-    public function remove(Product $product)
+    
+    /**
+     * Remove item from cart
+     */
+    public function remove($itemId)
     {
-        $cart = $this->getOrCreateCart();
-        $cart->removeItem($product->id);
-
-        return redirect()->back()->with('success', 'Ürün sepetten çıkarıldı.');
+        $cart = currentCart();
+        $cartItem = $cart->items()->findOrFail($itemId);
+        $product = $cartItem->product;
+        
+        // Rezerve edilmiş stoğu serbest bırak
+        $product->releaseStock($cartItem->quantity);
+        
+        $cartItem->delete();
+        
+        $cart->calculateTotal();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Item removed from cart',
+            'cart_total' => $cart->total,
+            'cart_count' => $cart->item_count,
+        ]);
     }
-
+    
+    /**
+     * Get cart count
+     */
+    public function count()
+    {
+        $cart = currentCart();
+        return response()->json(['count' => $cart->item_count]);
+    }
+    
+    /**
+     * Clear cart
+     */
     public function clear()
     {
-        $cart = $this->getOrCreateCart();
-        $cart->clear();
-
-        return redirect()->back()->with('success', 'Sepet temizlendi.');
-    }
-
-    public function checkout()
-    {
-        $cart = $this->getOrCreateCart();
-        $cart->load('items.product');
-
-        if ($cart->items->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'Sepetiniz boş.');
+        $cart = currentCart();
+        
+        // Rezerve edilmiş stoğu serbest bırak
+        foreach ($cart->items as $item) {
+            $item->product->releaseStock($item->quantity);
         }
-
-        $addresses = auth()->user()->addresses;
-
-        return view('cart.checkout', compact('cart', 'addresses'));
-    }
-
-    public function processOrder(Request $request)
-    {
-        $request->validate([
-            'shipping_address_id' => 'required|exists:addresses,id',
-            'billing_address_id' => 'required|exists:addresses,id',
-            'payment_method' => 'required|in:iyzico,shopier',
+        
+        $cart->items()->delete();
+        $cart->calculateTotal();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Cart cleared',
         ]);
-
-        $cart = $this->getOrCreateCart();
-        $cart->load('items.product');
-
-        if ($cart->items->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'Sepetiniz boş.');
-        }
-
-        DB::beginTransaction();
-        try {
-            // Create order
-            $order = Order::create([
-                'user_id' => auth()->id(),
-                'order_number' => 'ORD-' . strtoupper(uniqid()),
-                'total_amount' => $cart->getTotalAmount(),
-                'discount_amount' => 0,
-                'shipping_amount' => 0,
-                'status' => 'pending',
-                'payment_status' => 'pending',
-                'payment_method' => $request->payment_method,
-                'shipping_address' => auth()->user()->addresses()->find($request->shipping_address_id)->toArray(),
-                'billing_address' => auth()->user()->addresses()->find($request->billing_address_id)->toArray(),
-            ]);
-
-            // Create order items
-            foreach ($cart->items as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item->product_id,
-                    'product_name' => $item->product->name,
-                    'quantity' => $item->quantity,
-                    'price' => $item->price,
-                    'total' => $item->getTotal(),
-                ]);
-
-                // Update product stock and sale count
-                $item->product->decrement('stock', $item->quantity);
-                $item->product->incrementSaleCount($item->quantity);
-            }
-
-            // Clear cart
-            $cart->clear();
-
-            DB::commit();
-
-            // Send order confirmation notification
-            try {
-                auth()->user()->notify(new OrderPlacedNotification($order));
-            } catch (\Exception $e) {
-                Log::error('Failed to send order notification', [
-                    'order_id' => $order->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-
-            // Here you would integrate with Iyzico or Shopier
-            // For now, we'll just redirect to success page
-
-            return redirect()->route('order.detail', $order)->with('success', 'Siparişiniz alındı.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Sipariş oluşturulurken bir hata oluştu: ' . $e->getMessage());
-        }
-    }
-
-    public function myOrders()
-    {
-        $orders = Order::where('user_id', auth()->id())
-            ->with('items')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        return view('orders.index', compact('orders'));
-    }
-
-    public function orderDetail(Order $order)
-    {
-        if ($order->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        $order->load('items.product');
-
-        return view('orders.show', compact('order'));
     }
 }

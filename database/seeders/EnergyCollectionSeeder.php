@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Collection;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\EnergyCollection;
 use Illuminate\Support\Str;
 
 class EnergyCollectionSeeder extends Seeder
@@ -13,124 +14,78 @@ class EnergyCollectionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Önce mevcut energy koleksiyonlarını sil
-        Collection::where('type', 'energy')->delete();
-
-        $energyCollections = [
+        $collections = [
             [
                 'name' => 'Golden Jasmin',
-                'description' => 'Işık, yenilenme ve yaşam enerjisi',
-                'feeling' => 'Şans ve Yenilenme',
-                'color' => '#FAF0E6', // Pastel Ekru
-                'scent' => 'Jasmin',
-                'energy' => 'Işık, yenilenme, yaşam enerjisi, iyi başlangıçlar',
-                'emotion' => 'Tazelik, umut, canlılık',
-                'element' => 'Güneş',
-                'story' => 'Golden Jasmin, yeni başlangıçların ve yenilenmenin enerjisini taşır. Güneşin ışığı gibi, hayatınıza umut ve canlılık getirir. Her sabah yeni bir başlangıçtır ve Golden Jasmin bu enerjiyi evinize taşır.',
-                'order' => 1,
+                'slug' => 'golden-jasmin',
+                'color_code' => '#FBE2A9',
+                'description' => 'Şans ve pozitif enerji. Golden Jasmin koleksiyonu, hayatınıza bereket ve şans getirecek pozitif enerjileri bünyesinde barındırır. Her ürünümüz özenle seçilmiş Golden Jasmin enerjisiyle harmanlanmıştır.',
+                'sort_order' => 1,
+                'is_active' => true,
             ],
             [
                 'name' => 'Velvet Rose',
-                'description' => 'Sevgi ve romantizm enerjisi',
-                'feeling' => 'Sevgi ve Romantizm',
-                'color' => '#8B4F5C', // Pastel Bordo
-                'scent' => 'Velvet Rose',
-                'energy' => 'Kalp açıklığı, sevgi frekansı',
-                'emotion' => 'Şefkat, yumuşaklık, kalpten bağ',
-                'element' => 'Kalp',
-                'story' => 'Velvet Rose, kalbin dilini konuşur. Sevgi ve şefkatin yumuşak dokunuşuyla, ilişkilerinize derinlik katar. Kalp açıklığı ve romantizmin enerjisiyle evinizi sıcak bir yuva haline getirir.',
-                'order' => 2,
+                'slug' => 'velvet-rose',
+                'color_code' => '#E79993',
+                'description' => 'Aşk ve sevgi. Velvet Rose koleksiyonu, romantizm ve sevgi enerjilerini yaşamınıza taşır. İlişkilerinizi güçlendiren, kalpleri birbirine yaklaştıran özel ürünler.',
+                'sort_order' => 2,
+                'is_active' => true,
             ],
             [
                 'name' => 'Citrus Harmony',
-                'description' => 'Neşe ve pozitiflik enerjisi',
-                'feeling' => 'Neşe ve Pozitiflik',
-                'color' => '#FFD8A8', // Pastel Turuncu
-                'scent' => 'Citrus & Amber',
-                'energy' => 'Canlılık, coşku, güne enerjik başlama',
-                'emotion' => 'Mutluluk, yaratıcılık, motivasyon',
-                'element' => 'Ateş',
-                'story' => 'Citrus Harmony, güne enerjik başlamanın ve yaratıcılığın kaynağıdır. Ateş elementi gibi, içinizdeki tutkuyu ateşler ve motivasyonunuzu yükseltir. Her gün yeni bir fırsat, her an yeni bir başlangıçtır.',
-                'order' => 3,
-            ],
-            [
-                'name' => 'Luminous Bloom',
-                'description' => 'Ruhsal tazelenme enerjisi',
-                'feeling' => 'Ruhsal Tazelenme',
-                'color' => '#FFB6C1', // Pastel Pembe
-                'scent' => 'Peony',
-                'energy' => 'Hafiflik, yenilik, zarafet',
-                'emotion' => 'Güzellik, tazelik, zarif değişim',
-                'element' => 'Hava',
-                'story' => 'Luminous Bloom, ruhunuzun hafiflemesini ve yenilenmesini sağlar. Hava elementi gibi özgür ve zarif, değişime açık bir enerji taşır. Güzellik ve tazelik arayışınızda size eşlik eder.',
-                'order' => 4,
-            ],
-            [
-                'name' => 'Secret Oud',
-                'description' => 'Huzur ve bereket enerjisi',
-                'feeling' => 'Huzur ve Bereket',
-                'color' => '#B4D7B4', // Pastel Yeşil
-                'scent' => 'Oud & Jasmin',
-                'energy' => 'Bolluk akışı, içsel huzur, denge',
-                'emotion' => 'Teslimiyet, spiritüel denge, sakinlik',
-                'element' => 'Ağaç',
-                'story' => 'Secret Oud, bolluk ve huzurun sırrını taşır. Ağaç elementi gibi köklü ve dengeli, içsel huzurunuzu bulmanıza yardımcı olur. Spiritüel dengeniz için mükemmel bir arkadaştır.',
-                'order' => 5,
-            ],
-            [
-                'name' => 'Earth Harmony',
-                'description' => 'Köklenme ve güven enerjisi',
-                'feeling' => 'Köklenme ve Güven',
-                'color' => '#E8D5C4', // Pastel Bej
-                'scent' => 'Sandalwood',
-                'energy' => 'Topraklanma, bolluk, güven, istikrar',
-                'emotion' => 'Güçlü temeller, huzur, güven hissi',
-                'element' => 'Toprak',
-                'story' => 'Earth Harmony, topraklanmanın ve güvenin enerjisini taşır. Toprak elementi gibi sağlam ve istikrarlı, güçlü temeller oluşturmanıza yardımcı olur. Hayatınıza bolluk ve güven getirir.',
-                'order' => 6,
-            ],
-            [
-                'name' => 'Royal Spice',
-                'description' => 'Arınma ve dönüşüm enerjisi',
-                'feeling' => 'Arınma ve Dönüşüm',
-                'color' => '#C8C8C8', // Pastel Gri
-                'scent' => 'Spice & Musk',
-                'energy' => 'Negatif enerjiyi temizleme, yeniden doğuş',
-                'emotion' => 'Güçlenme, cesaret, dönüşüm',
-                'element' => 'Metal / Ateş',
-                'story' => 'Royal Spice, arınma ve dönüşümün gücünü taşır. Metal ve ateş elementlerinin birleşimi, negatif enerjileri temizler ve yeniden doğuşunuza zemin hazırlar. Cesaretle dönüşün, güçlenerek yeniden doğun.',
-                'order' => 7,
+                'slug' => 'citrus-harmony',
+                'color_code' => '#FFD18A',
+                'description' => 'Neşe ve canlılık. Citrus Harmony koleksiyonu, enerji dolu, neşeli ve canlı bir yaşam tarzı sunar. Her gününüzü pozitif enerjiyle dolduracak taze ve dinamik ürünler.',
+                'sort_order' => 3,
+                'is_active' => true,
             ],
             [
                 'name' => 'Lavender Peace',
-                'description' => 'Huzur ve rahatlama enerjisi',
-                'feeling' => 'Huzur ve Rahatlama',
-                'color' => '#E6E6FA', // Pastel Lila
-                'scent' => 'Lavender & Cotton',
-                'energy' => 'Zihinsel dinginlik, uyku enerjisi',
-                'emotion' => 'Sessizlik, huzur, yumuşak sakinlik',
-                'element' => 'Su',
-                'story' => 'Lavender Peace, zihinsel dinginlik ve huzurun kaynağıdır. Su elementi gibi akıcı ve sakin, rahatlamanıza ve derin bir uykuya dalmanıza yardımcı olur. Sessizliğin ve huzurun tadını çıkarın.',
-                'order' => 8,
+                'slug' => 'lavender-peace',
+                'color_code' => '#C7A7EA',
+                'description' => 'Rahatlama ve stres azaltma. Lavender Peace koleksiyonu, huzurlu ve sakin bir yaşam için tasarlanmıştır. Stres ve endişelerinizden kurtulup iç huzurunuza kavuşun.',
+                'sort_order' => 4,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Luminous Bloom',
+                'slug' => 'luminous-bloom',
+                'color_code' => '#F7AEC9',
+                'description' => 'Yenilenme ve tazelik. Luminous Bloom koleksiyonu, yaşam enerjinizi yenileyen ve tazelik veren ürünlerle doludur. Her başlangıç için perfect.',
+                'sort_order' => 5,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Sacred Oud',
+                'slug' => 'sacred-oud',
+                'color_code' => '#CFE8CB',
+                'description' => 'Huzur ve bereket. Sacred Oud koleksiyonu, manevi huzur ve bereketi yaşamınıza taşır. Enerjinizi dengeleyen, içsel huzura ulaşmanızı sağlayan özel ürünler.',
+                'sort_order' => 6,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Earth Harmony',
+                'slug' => 'earth-harmony',
+                'color_code' => '#D9B78F',
+                'description' => 'Bolluk ve topraklama. Earth Harmony koleksiyonu, toprak enerjisiyle birleşerek yaşamınıza bolluk ve istikrar getirir. Temel ihtiyaçlarınızı karşılayan güçlü enerjiler.',
+                'sort_order' => 7,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Royal Spice',
+                'slug' => 'royal-spice',
+                'color_code' => '#C79B7E',
+                'description' => 'Arınma ve negatif enerji temizliği. Royal Spice koleksiyonu, negatif enerjilerden arınmanızı sağlar. Yaşam alanınızı temizleyip pozitif enerjiyle doldurur.',
+                'sort_order' => 8,
+                'is_active' => true,
             ],
         ];
-
-        foreach ($energyCollections as $collectionData) {
-            Collection::create([
-                'name' => $collectionData['name'],
-                'slug' => Str::slug($collectionData['name']),
-                'description' => $collectionData['description'],
-                'type' => 'energy',
-                'feeling' => $collectionData['feeling'],
-                'color' => $collectionData['color'],
-                'scent' => $collectionData['scent'],
-                'energy' => $collectionData['energy'],
-                'emotion' => $collectionData['emotion'],
-                'element' => $collectionData['element'],
-                'story' => $collectionData['story'],
-                'order' => $collectionData['order'],
-                'is_active' => true,
-            ]);
+        
+        foreach ($collections as $collection) {
+            EnergyCollection::updateOrCreate(
+                ['slug' => $collection['slug']],
+                $collection
+            );
         }
     }
 }

@@ -19,8 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register observers
-        \App\Models\Collection::observe(\App\Observers\CollectionObserver::class);
-        \App\Models\Product::observe(\App\Observers\ProductObserver::class);
+        // Set locale from session
+        if (session()->has('locale')) {
+            app()->setLocale(session()->get('locale'));
+        } else {
+            app()->setLocale('tr');
+        }
     }
 }
