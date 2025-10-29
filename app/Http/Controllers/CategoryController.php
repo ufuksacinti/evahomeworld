@@ -12,9 +12,15 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+        $categories = Category::where('is_active', true);
+        
+        if (\Illuminate\Support\Facades\Schema::hasColumn('categories', 'sort_order')) {
+            $categories = $categories->orderBy('sort_order');
+        } else {
+            $categories = $categories->orderBy('created_at', 'desc');
+        }
+        
+        $categories = $categories->get();
         
         return view('categories.index', compact('categories'));
     }
