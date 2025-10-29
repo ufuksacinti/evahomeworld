@@ -7,8 +7,9 @@
  * ÖNEMLİ: Bu script'i kullandıktan sonra mutlaka silin!
  */
 
-// Güvenlik: Şifre belirleyin (veritabanı şifresi ile güçlendirildi)
-$SECURE_PASSWORD = 'EvaHome2024!Pull_B)G18T$1S+yg';
+// Güvenlik: Şifre belirleyin
+// Şifre: EvaHome2024Pull
+$SECURE_PASSWORD = 'EvaHome2024Pull';
 
 // Şifre kontrolü
 if (!isset($_GET['password']) || $_GET['password'] !== $SECURE_PASSWORD) {
