@@ -63,16 +63,43 @@ header('Content-Type: text/html; charset=utf-8');
             echo '<div class="step">';
             echo '<h3>📦 1. Composer Install</h3>';
             
-            // Composer path kontrolü
+            // Composer path kontrolü ve otomatik indirme
             $composerPath = '';
-            if (file_exists($basePath . '/composer.phar')) {
+            $composerPharPath = $basePath . '/composer.phar';
+            
+            // Önce mevcut composer.phar'ı kontrol et
+            if (file_exists($composerPharPath)) {
                 $composerPath = 'php composer.phar';
+                echo '<p class="success">✓ composer.phar bulundu!</p>';
             } elseif (file_exists('/usr/local/bin/composer')) {
                 $composerPath = '/usr/local/bin/composer';
+                echo '<p class="success">✓ Sistem composer bulundu!</p>';
             } elseif (file_exists('/usr/bin/composer')) {
                 $composerPath = '/usr/bin/composer';
+                echo '<p class="success">✓ Sistem composer bulundu!</p>';
             } else {
-                $composerPath = 'composer';
+                // Composer.phar yoksa indirmeyi dene
+                echo '<p class="warning">⚠️ composer.phar bulunamadı. İndiriliyor...</p>';
+                
+                // Composer.phar'ı indir
+                $composerUrl = 'https://getcomposer.org/composer-stable.phar';
+                $composerContent = @file_get_contents($composerUrl);
+                
+                if ($composerContent !== false && file_put_contents($composerPharPath, $composerContent)) {
+                    chmod($composerPharPath, 0755);
+                    $composerPath = 'php composer.phar';
+                    echo '<p class="success">✓ composer.phar başarıyla indirildi!</p>';
+                } else {
+                    echo '<p class="error">❌ composer.phar indirilemedi. Manuel olarak indirmeniz gerekiyor.</p>';
+                    echo '<p class="info">📥 <strong>Manuel İndirme:</strong></p>';
+                    echo '<ol>';
+                    echo '<li>Tarayıcınızda şu adresi açın: <code>https://getcomposer.org/composer.phar</code></li>';
+                    echo '<li>İndirilen dosyayı <code>' . htmlspecialchars($composerPharPath) . '</code> konumuna yükleyin</li>';
+                    echo '<li>cPanel File Manager ile dosyayı yükleyin ve script\'i tekrar çalıştırın</li>';
+                    echo '</ol>';
+                    echo '</div>'; // step div'ini kapat
+                    goto skip_composer_install; // Composer install'ı atla
+                }
             }
             
             echo '<div class="command">' . htmlspecialchars($composerPath) . ' install --no-dev --optimize-autoloader</div>';
@@ -80,7 +107,7 @@ header('Content-Type: text/html; charset=utf-8');
             
             $output = [];
             $return_var = 0;
-            $command = $composerPath . ' install --no-dev --optimize-autoloader 2>&1';
+            $command = 'cd ' . escapeshellarg($basePath) . ' && ' . $composerPath . ' install --no-dev --optimize-autoloader 2>&1';
             
             exec($command, $output, $return_var);
             
@@ -100,11 +127,14 @@ header('Content-Type: text/html; charset=utf-8');
                 echo '<p class="success">✓ Composer install başarılı!</p>';
             } else {
                 echo '<p class="error">❌ Composer install hatası! Çıkış kodu: ' . $return_var . '</p>';
-                if (strpos(implode("\n", $output), 'command not found') !== false || strpos(implode("\n", $output), 'Composer not found') !== false) {
-                    echo '<p class="warning">⚠️ Composer kurulu değil veya PATH\'te bulunamıyor. cPanel\'de composer.phar dosyasını indirin veya hosting sağlayıcınızdan yardım isteyin.</p>';
+                $outputString = implode("\n", $output);
+                if (strpos($outputString, 'command not found') !== false) {
+                    echo '<p class="warning">⚠️ Composer komutu bulunamadı. composer.phar dosyasını manuel olarak indirmeniz gerekiyor.</p>';
                 }
             }
             echo '</div>';
+            
+            skip_composer_install:
         }
         
         // Laravel Cache Temizleme (Artisan kullan)
@@ -117,8 +147,6 @@ header('Content-Type: text/html; charset=utf-8');
                 require $basePath . '/vendor/autoload.php';
                 $app = require_once $basePath . '/bootstrap/app.php';
                 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-                
-                use Illuminate\Support\Facades\Artisan;
                 
                 $cacheCommands = [
                     'Config Cache Temizle' => 'config:clear',
@@ -134,8 +162,8 @@ header('Content-Type: text/html; charset=utf-8');
                     echo '<div class="command">php artisan ' . htmlspecialchars($command) . '</div>';
                     
                     try {
-                        Artisan::call($command);
-                        $output = Artisan::output();
+                        \Illuminate\Support\Facades\Artisan::call($command);
+                        $output = \Illuminate\Support\Facades\Artisan::output();
                         
                         echo '<pre style="max-height: 100px;">';
                         echo htmlspecialchars($output ?: '(Başarılı)');
@@ -249,8 +277,6 @@ header('Content-Type: text/html; charset=utf-8');
                     $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
                 }
                 
-                use Illuminate\Support\Facades\Artisan;
-                
                 $configCommands = [
                     'Config Cache' => 'config:cache',
                     'Route Cache' => 'route:cache',
@@ -263,8 +289,8 @@ header('Content-Type: text/html; charset=utf-8');
                     echo '<div class="command">php artisan ' . htmlspecialchars($command) . '</div>';
                     
                     try {
-                        Artisan::call($command);
-                        $output = Artisan::output();
+                        \Illuminate\Support\Facades\Artisan::call($command);
+                        $output = \Illuminate\Support\Facades\Artisan::output();
                         
                         echo '<pre style="max-height: 100px;">';
                         echo htmlspecialchars($output ?: '(Başarılı)');
