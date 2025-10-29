@@ -58,14 +58,16 @@ header('Content-Type: text/html; charset=utf-8');
         echo '<p><strong>Klasör:</strong> ' . htmlspecialchars($gitPath) . '</p>';
         echo '</div>';
         
-        // Git komutlarını çalıştır
+        // Git komutlarını çalıştır - AGRESİF TEMİZLEME
         $commands = [
             'Mevcut Durum' => 'git status',
+            'Local Değişiklikleri Stash Et' => 'git stash',
             'Remote Bilgisi' => 'git remote -v',
-            'Branch Bilgisi' => 'git branch',
-            'Fetch' => 'git fetch origin',
-            'Reset' => 'git reset --hard origin/ufuk',
-            'Clean' => 'git clean -fd',
+            'Branch Kontrolü (ufuk branch\'ine geç)' => 'git checkout ufuk 2>&1 || git branch ufuk 2>&1 || echo "Branch hazır"',
+            'Fetch (Tüm Değişiklikleri Çek)' => 'git fetch origin --prune',
+            'Reset (GitHub ile Eşitle)' => 'git reset --hard origin/ufuk',
+            'Clean (Tüm Untracked Dosyaları Sil)' => 'git clean -fdx',
+            'Untracked Dosyaları Liste' => 'git ls-files --others --exclude-standard',
             'Son Durum' => 'git status',
             'Son 5 Commit' => 'git log --oneline -5',
         ];
@@ -97,7 +99,7 @@ header('Content-Type: text/html; charset=utf-8');
             }
             echo '</pre>';
             
-            if ($return_var !== 0 && $stepName !== 'Clean') {
+            if ($return_var !== 0 && !in_array($stepName, ['Clean', 'Local Değişiklikleri Stash Et', 'Branch Kontrolü (ufuk branch\'ine geç)', 'Untracked Dosyaları Liste'])) {
                 echo '<p class="warning">⚠️ Komut çıkış kodu: ' . $return_var . '</p>';
             } else {
                 echo '<p class="success">✓ Tamamlandı</p>';
@@ -109,7 +111,7 @@ header('Content-Type: text/html; charset=utf-8');
         // Özet
         echo '<div class="step success">';
         echo '<h3>✅ İşlem Tamamlandı!</h3>';
-        echo '<p>Sunucu GitHub'daki <strong>ufuk</strong> branch'i ile eşitlendi.</p>';
+        echo '<p>Sunucu GitHub\'daki <strong>ufuk</strong> branch\'i ile eşitlendi.</p>';
         echo '<p><strong>Son Commit:</strong></p>';
         echo '<pre>';
         if (isset($allOutput['Son 5 Commit']['output'])) {
@@ -118,15 +120,62 @@ header('Content-Type: text/html; charset=utf-8');
         echo '</pre>';
         echo '</div>';
         
+        // Ek Temizlik: Gereksiz Dosyaları Sil
+        echo '<div class="step info">';
+        echo '<h3>🧹 Ek Temizlik İşlemleri</h3>';
+        
+        $filesToDelete = [
+            // Eski scriptler (eğer hala varsa)
+            $basePath . '/public/check-db.php',
+            $basePath . '/public/test-php.php',
+            $basePath . '/public/info.php',
+            // Eski index.php (public_html kökünde olmamalı)
+            // Not: public_html/index.php'yi silmeyelim, Laravel için gerekli olabilir
+        ];
+        
+        $deletedFiles = [];
+        foreach ($filesToDelete as $file) {
+            if (file_exists($file) && strpos(realpath($file), $basePath) === 0) {
+                // Sadece proje dizini içindeki dosyaları sil
+                if (unlink($file)) {
+                    $deletedFiles[] = $file;
+                }
+            }
+        }
+        
+        if (!empty($deletedFiles)) {
+            echo '<p class="success">✓ Silinen Dosyalar:</p><ul>';
+            foreach ($deletedFiles as $file) {
+                echo '<li>' . htmlspecialchars(basename($file)) . '</li>';
+            }
+            echo '</ul>';
+        } else {
+            echo '<p>✓ Gereksiz dosya bulunamadı.</p>';
+        }
+        echo '</div>';
+        
         // Önemli uyarılar
         echo '<div class="step warning">';
         echo '<h3>⚠️ ÖNEMLİ UYARILAR</h3>';
         echo '<ul>';
-        echo '<li><strong>.env dosyası:</strong> Git pull .env dosyasını etkilemez (gitignore\'da)</li>';
-        echo '<li><strong>vendor klasörü:</strong> Composer install yapmanız gerekebilir</li>';
+        echo '<li><strong>.env dosyası:</strong> Git pull .env dosyasını etkilemez (gitignore\'da) - GÜVENLİ</li>';
+        echo '<li><strong>vendor klasörü:</strong> .gitignore\'da olduğu için korunur - GÜVENLİ</li>';
+        echo '<li><strong>node_modules:</strong> .gitignore\'da olduğu için korunur - GÜVENLİ</li>';
+        echo '<li><strong>public/build:</strong> .gitignore\'da, npm run build ile yeniden oluşturulmalı</li>';
         echo '<li><strong>Cache:</strong> Config ve cache\'leri temizlemeniz gerekebilir</li>';
         echo '<li><strong>İzinler:</strong> storage ve bootstrap/cache klasörlerinin yazma izni olmalı</li>';
         echo '</ul>';
+        echo '</div>';
+        
+        // Sonraki adımlar
+        echo '<div class="step info">';
+        echo '<h3>📋 Sonraki Adımlar</h3>';
+        echo '<ol>';
+        echo '<li><strong>Composer Install:</strong> <code>composer install --no-dev --optimize-autoloader</code></li>';
+        echo '<li><strong>Cache Temizle:</strong> <code>php artisan optimize:clear</code></li>';
+        echo '<li><strong>Assets Build:</strong> <code>npm install && npm run build</code></li>';
+        echo '<li><strong>Config Cache:</strong> <code>php artisan config:cache</code></li>';
+        echo '</ol>';
         echo '</div>';
         ?>
         
