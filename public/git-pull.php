@@ -7,8 +7,8 @@
  * ÖNEMLİ: Bu script'i kullandıktan sonra mutlaka silin!
  */
 
-// Güvenlik: Şifre belirleyin
-$SECURE_PASSWORD = 'EvaHome2024!Pull'; // BURAYI DEĞİŞTİRİN!
+// Güvenlik: Şifre belirleyin (veritabanı şifresi ile güçlendirildi)
+$SECURE_PASSWORD = 'EvaHome2024!Pull_B)G18T$1S+yg';
 
 // Şifre kontrolü
 if (!isset($_GET['password']) || $_GET['password'] !== $SECURE_PASSWORD) {
@@ -118,7 +118,7 @@ header('Content-Type: text/html; charset=utf-8');
         echo '</div>';
         
         // Önemli uyarılar
-        echo '<div class="step warning osob">';
+        echo '<div class="step warning">';
         echo '<h3>⚠️ ÖNEMLİ UYARILAR</h3>';
         echo '<ul>';
         echo '<li><strong>.env dosyası:</strong> Git pull .env dosyasını etkilemez (gitignore\'da)</li>';
