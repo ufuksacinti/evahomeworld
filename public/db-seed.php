@@ -80,20 +80,10 @@ header('Content-Type: text/html; charset=utf-8');
             echo '<h3>⏳ Veriler yükleniyor...</h3>';
             echo '<p class="warning">⚠️ Bu işlem birkaç dakika sürebilir.</p>';
             
-            // AdminUserSeeder çalıştır (önce admin kullanıcısı oluştur)
-            echo '<p><strong>Adım 1:</strong> Admin kullanıcıları oluşturuluyor...</p>';
-            try {
-                Artisan::call('db:seed', [
-                    '--class' => 'Database\Seeders\AdminUserSeeder',
-                    '--force' => true
-                ]);
-                echo '<p class="success">✓ Admin kullanıcıları oluşturuldu.</p>';
-            } catch (\Exception $e) {
-                echo '<p class="warning">⚠️ Admin seeder hatası: ' . htmlspecialchars($e->getMessage()) . '</p>';
-            }
+            // DatabaseSeeder çalıştır (tüm seeder'ları - admin de dahil)
+            echo '<p><strong>Adım 1:</strong> Tüm veriler yükleniyor (admin users, translations, collections, categories, products)...</p>';
+            echo '<p class="info">ℹ️ Eğer kayıtlar zaten varsa güncellenecek, yoksa oluşturulacak.</p>';
             
-            // DatabaseSeeder çalıştır (tüm seeder'ları)
-            echo '<p><strong>Adım 2:</strong> Tüm veriler yükleniyor (translations, collections, categories, products)...</p>';
             Artisan::call('db:seed', ['--force' => true]);
             $seedOutput = Artisan::output();
             
