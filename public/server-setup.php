@@ -128,7 +128,7 @@ header('Content-Type: text/html; charset=utf-8');
             $output = [];
             $return_var = 0;
             // COMPOSER_HOME ve HOME environment variable'larını ayarla
-            putenv('HOMEglossary=' . $homeDir);
+            putenv('HOME=' . $homeDir);
             putenv('COMPOSER_HOME=' . $composerHome);
             
             // Eksik extension'lar varsa --ignore-platform-req ekle
