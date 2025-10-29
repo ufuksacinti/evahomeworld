@@ -70,16 +70,20 @@ class HomeController extends Controller
             $mostLikedProducts = $mostLikedProducts->merge($featuredProducts)->take(8);
         }
         
-        $energyCollections = EnergyCollection::where('is_active', true);
-        
-        // sort_order kolonu varsa ona göre sırala
-        if (Schema::hasColumn('energy_collections', 'sort_order')) {
-            $energyCollections = $energyCollections->orderBy('sort_order');
-        } else {
-            $energyCollections = $energyCollections->orderBy('created_at', 'desc');
+        // Energy collections tablosu var mı kontrol et
+        $energyCollections = collect();
+        if (Schema::hasTable('energy_collections')) {
+            $energyCollectionsQuery = EnergyCollection::where('is_active', true);
+            
+            // sort_order kolonu varsa ona göre sırala
+            if (Schema::hasColumn('energy_collections', 'sort_order')) {
+                $energyCollectionsQuery = $energyCollectionsQuery->orderBy('sort_order');
+            } else {
+                $energyCollectionsQuery = $energyCollectionsQuery->orderBy('created_at', 'desc');
+            }
+            
+            $energyCollections = $energyCollectionsQuery->take(4)->get();
         }
-        
-        $energyCollections = $energyCollections->take(4)->get();
         
         return view('home', compact('mostLikedProducts', 'energyCollections'));
     }
