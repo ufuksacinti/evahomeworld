@@ -72,9 +72,15 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
+            // sort_order kolonu yoksa, veriden çıkar
+            $categoryData = $category;
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('categories', 'sort_order')) {
+                unset($categoryData['sort_order']);
+            }
+            
             Category::updateOrCreate(
                 ['slug' => $category['slug']],
-                $category
+                $categoryData
             );
         }
 
